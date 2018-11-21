@@ -1,9 +1,8 @@
 //
 // Created by riham on 24/10/18.
 //
-
 #include "Bag.h"
-
+#include <cstring>
 int Bag::bagLen() {
     return bagSize;
 }
@@ -28,7 +27,7 @@ int Bag::getTieScore(int index) {
 
 Bag& Bag::operator=(Bag const& myObj) {
     bagSize = myObj.bagSize;
-    memcpy(bag, myObj.bag, sizeof bag);
+    memcpy(bag, myObj.bag, sizeof(bag));
     return *this;
 }
 
