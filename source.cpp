@@ -328,7 +328,7 @@ long double change(Bag & bag, Player & ply, vector<char> tiles) {
 }
 long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 		Player opponent, Bag & bag, int cnt) {
-	if (board.close() || idx >= depth || cnt >= 2) {	////////
+	if (J.isClosed(board) || idx >= depth || cnt >= 2) {	////////
 		return huristicBoard(board);
 		// mfrod azod 7aga hna huristic of board
 	}
@@ -353,7 +353,7 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 						* ProbabilisticSearch(idx + 1, board, 0, ana, opponent,
 								b, 0);
 			} else {
-				int score = J.applyMove(move, board, opponent);
+				int score = J.applyMove(move, board, opponent,b);
 				ret -= p
 						* (ProbabilisticSearch(idx + 1, board, 0, ana, opponent,
 								b, 0) + score);
@@ -375,7 +375,7 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 								b, 0);
 
 			} else {
-				int score = J.applyMove(move, board, ana);
+				int score = J.applyMove(move, board, ana,b);
 				ret += p
 						* (ProbabilisticSearch(idx + 1, board, 1, ana, opponent,
 								b, 0) + score);

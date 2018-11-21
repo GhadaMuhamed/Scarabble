@@ -1,6 +1,12 @@
 #ifndef SCRABBLE_BAG_H
 #define SCRABBLE_BAG_H
-#include <bits/stdc++.h>
+#include<iostream>
+#include<cmath>
+#include<map>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include <sstream>
 
 using namespace std;
 // bag want acess value of id func get
@@ -17,6 +23,7 @@ public:
 	// it removes a tie from the bag and returns its score
 	int removeTie(int index);
 	// get Tie count
+	int addTie(int index);
 	int getTieCount(int index);
 	// get Tie score
 	int getTieScore(int index);
