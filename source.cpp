@@ -15,7 +15,7 @@ using namespace std;
 # define S 10
 Judge J;
 const char st = 'A';
-int opponentDeck[26];
+const string mostUsedLetters = "etaoinshrdlcumwfgypbvkjxqz";
 ///implement for omnia
 long double huristicBoard(const Board &board) {
 	return 0;
@@ -38,20 +38,20 @@ double calcProbability(int freq[], int score, Bag b, int cur[]) {
 		// cur[i] hya el 7rof eli m3aya
 		freq[i] -= cur[i];
 		cnt += freq[i];
-		letterP *= J.pascal[b.bag[i]][freq[i]];
+		letterP *= J.pascal[b.getTieCount(i)][freq[i]];
 	}
-	letterP /= (J.pascal[b.bagSize][cnt] * 1.0);
+	letterP /= (J.pascal[b.bagLen()][cnt] * 1.0);
 	// multiply by 2.5 if the score isn't calculated for the board
 	return letterP * (50 + score);
 }
 // mmkn ab2a a3mlni class w a5ali m3aya nos5a ml bag object a7sn
-double expectedBingoMe(Bag b, string s, int tiles[]) {
+double expectedBingoMe(Bag b, string s, Player &player) {
 
 	int freq[26], cur[26];
 	memset(freq, 0, sizeof(freq));
 	memset(cur, 0, sizeof(cur));
 	for (int i = 0; i < 26; ++i)
-		cur[i] = tiles[i];
+		cur[i] = player.gitTie(i);
 	for (int i = 0; i < s.size(); ++i)
 		cur[s[i] - st]--;
 
@@ -75,7 +75,7 @@ int expectedBingoOpponent() {
 	for (int i = 0; i < possible.size(); ++i) {
 		mx = max(mx, possible[i].second);
 	}
-	return mx;
+	return -mx;
 	// eb3ty el mx
 	//////////////// mfrod ab3t el exScore
 }
@@ -145,8 +145,7 @@ double RackLeaveScore(string C) {
 }
 
 //----------------------->will be modified later depending on what will bs sent
-double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
-		Move move) {
+double DefensiveStrategy(Board& board, Move move) {
 	double perm = 0.0;
 	vector<int> newWord;
 	newWord.push_back(move.direction);
@@ -171,33 +170,33 @@ double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
 	if (newWord[0] == 0) {
 		//search horizontally--left of the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (Board[newWord[1]][i] == 0)	//no letter in this box
+			if (board.getBoardValue(newWord[1], i) == 0)//no letter in this box
 					{
-				if (A[newWord[1]][i] == 1)
+				if (board.getMultiplierLetter(newWord[1], i))
 					perm += 0.5;
-				else if (B[newWord[1]][i])
+				else if (board.getMultiplierWord(newWord[1], i))
 					perm += 1.5;
 			}
 		}
 		//right of the word
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (Board[newWord[1]][i] == 0)	//no letter in this box
+			if (board.getBoardValue(newWord[1], i) == 0)//no letter in this box
 					{
-				if (A[newWord[1]][i] == 1)
+				if (board.getMultiplierLetter(newWord[1], i))
 					perm += 0.5;
-				else if (B[newWord[1]][i])
+				else if (board.getMultiplierWord(newWord[1], i))
 					perm += 1.5;
 			}
 		}
 		//under the word
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (Board[i][j] == 0)	//no letter in this box
+				if (board.getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (A[i][j] == 1)
+					if (board.getMultiplierLetter(i, j))
 						perm += 0.5;
-					else if (B[i][j])
+					else if (board.getMultiplierWord(i, j))
 						perm += 1.5;
 				}
 			}
@@ -205,11 +204,11 @@ double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
 		//above the word
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (Board[i][j] == 0)	//no letter in this box
+				if (board.getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (A[i][j] == 1)
+					if (board.getMultiplierLetter(i, j))
 						perm += 0.5;
-					else if (B[i][j])
+					else if (board.getMultiplierWord(i, j))
 						perm += 1.5;
 				}
 			}
@@ -219,22 +218,22 @@ double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
 	else {
 		//above the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (Board[i][newWord[1]] == 0)	//no letter in this box
+			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (A[i][newWord[1]] == 1)
+				if (board.getMultiplierLetter(i, newWord[1]))
 					perm += 0.5;
-				else if (B[i][newWord[1]])
+				else if (board.getMultiplierWord(i, newWord[1]))
 					perm += 1.5;
 			}
 		}
 		//under of the word
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (Board[i][newWord[1]] == 0)	//no letter in this box
+			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (A[i][newWord[1]] == 1)
+				if (board.getMultiplierLetter(i, newWord[1]))
 					perm += 0.5;
-				else if (B[i][newWord[1]])
+				else if (board.getMultiplierWord(i, newWord[1]))
 					perm += 1.5;
 			}
 		}
@@ -242,11 +241,11 @@ double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
 		//right to  the word
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (Board[j][i] == 0)	//no letter in this box
+				if (board.getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (A[j][i] == 1)
+					if (board.getMultiplierLetter(j, i))
 						perm += 0.5;
-					else if (B[j][i])
+					else if (board.getMultiplierWord(j, i))
 						perm += 1.5;
 				}
 			}
@@ -254,22 +253,28 @@ double DefensiveStrategy(int A[15][15], int B[15][15], int Board[15][15],
 		//left to the word
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (Board[j][i] == 0)	//no letter in this box
+				if (board.getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (A[j][i] == 1)
+					if (board.getMultiplierLetter(j, i))
 						perm += 0.5;
-					else if (B[j][i])
+					else if (board.getMultiplierWord(j, i))
 						perm += 1.5;
 				}
 			}
 		}
 
 	}
-	return perm;
+	return -perm;
 }
 vector<Move> getAllMoves() {
 	vector<Move> v;
 	return v;
+}
+char getChange(Player& p) {
+	for (int i = mostUsedLetters.size() - 1; i >= 0; --i)
+		if (p.gitTie(mostUsedLetters[i] - st))
+			return mostUsedLetters[i];
+
 }
 Move huristicMoves(Board board, Player ana, Player opponent, Bag b) {
 	string C;
@@ -277,10 +282,9 @@ Move huristicMoves(Board board, Player ana, Player opponent, Bag b) {
 	Move BestMove;
 	int mx = -1;
 	for (int i = 0; i < allMoves.size(); ++i) {
-		float num = expectedBingoMe(b, allMoves[i].word, ana.myTies)
+		float num = expectedBingoMe(b, allMoves[i].word, ana)
 				+ expectedBingoOpponent()
-				+ DefensiveStrategy(board.board, board.multiplier_letter,
-						board.multiplier_word, allMoves[i])
+				+ DefensiveStrategy(board, allMoves[i])
 				+ RackLeaveScore(allMoves[i].word);
 		if (num > mx)
 			mx = num, BestMove = allMoves[i];
@@ -335,7 +339,7 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 		b = bag;	// check for riham operator overloding
 		if (game == 1) {
 			p = radom_rack(b, opponent);
-			Move move = huristicMoves(board, opponent, ana,b);
+			Move move = huristicMoves(board, opponent, ana, b);
 			if (move.switchMove) {
 				bool ex = false;
 				if (bag.bagLen() == 0)
@@ -385,6 +389,11 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 // ana mb3otly acctions klaha tnf3 tt3ml rihaaaaaaaaaaaaaaaaaam
 Move nextPlay(const vector<Move>&plays, Board board, Bag bag, Player ana,
 		Judge j) {
+	if (!plays.size()) {
+		Move m;
+		m.tiles.push_back(getChange(ana));
+		return m;
+	}
 	long double mx = -1e18;
 	int playIdx = 0;
 	J = j;

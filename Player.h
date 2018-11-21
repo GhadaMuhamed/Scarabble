@@ -23,6 +23,7 @@ public:
 	Player(int playerId);
 	bool addTie(int tie);
 	int getTotalTies();
+	int gitTie(int pos);
 	bool playTie(int tie);
 	friend ostream& operator<<(ostream& os, Player const& myObj);
 };
