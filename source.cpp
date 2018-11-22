@@ -166,51 +166,80 @@ double DefensiveStrategy(Board& board, Move move) {
 	 rest of number are column indexes in case of horizontal
 	 and row indexes in case of vertical
 	 */
+	int d_factor = 1;
+	double n = 1;
 	//horizontal word
 	if (newWord[0] == 0) {
 		//search horizontally--left of the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
 			if (board.getBoardValue(newWord[1], i) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(newWord[1], i))
-					perm += 0.5;
-				else if (board.getMultiplierWord(newWord[1], i))
-					perm += 1.5;
+				if (board.getMultiplierLetter(newWord[1], i) == 2)
+					perm += d_factor*0.4;
+				else if (board.getMultiplierLetter(newWord[1], i) == 3)
+					perm += d_factor*0.8;
+				else if (board.getMultiplierWord(newWord[1], i) == 2)
+					perm += d_factor*1.2;
+				else if(board.getMultiplierWord(newWord[1], i) == 3)
+					perm += d_factor*1.6;
 			}
+			else n -= 0.02;
+			d_factor -= 0.3;
 		}
 		//right of the word
+		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
 			if (board.getBoardValue(newWord[1], i) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(newWord[1], i))
-					perm += 0.5;
-				else if (board.getMultiplierWord(newWord[1], i))
-					perm += 1.5;
+				if (board.getMultiplierLetter(newWord[1], i)==2)
+					perm += d_factor*0.4;
+				else if (board.getMultiplierLetter(newWord[1], i) == 3)
+					perm += d_factor*0.8;
+				else if (board.getMultiplierWord(newWord[1], i)==2)
+					perm += d_factor*1.2;
+				else if (board.getMultiplierWord(newWord[1], i) == 3)
+					perm += d_factor*1.6;
 			}
+			else n -= 0.02;
+			d_factor -= 0.3;
 		}
 		//under the word
+		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board.getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(i, j))
-						perm += 0.5;
-					else if (board.getMultiplierWord(i, j))
-						perm += 1.5;
+					if (board.getMultiplierLetter(i, j)==2)
+						perm += d_factor*0.4;
+					else if (board.getMultiplierLetter(i, j)==3)
+						perm += d_factor*0.8;
+					else if (board.getMultiplierWord(i, j)==2)
+						perm += d_factor*1.2;
+					else  if (board.getMultiplierWord(i, j)==3)
+						perm += d_factor*1.6;
 				}
+				else n -= 0.02;
+				d_factor -= 0.3;
 			}
 		}
 		//above the word
+		d_factor =1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board.getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(i, j))
-						perm += 0.5;
-					else if (board.getMultiplierWord(i, j))
-						perm += 1.5;
+					if (board.getMultiplierLetter(i, j) == 2)
+						perm += d_factor*0.4;
+					else if (board.getMultiplierLetter(i, j) == 3)
+						perm += d_factor*0.8;
+					else if (board.getMultiplierWord(i, j) == 2)
+						perm += d_factor*1.2;
+					else  if (board.getMultiplierWord(i, j) == 3)
+						perm += d_factor*1.6;
 				}
+				else n -= 0.02;
+				d_factor -= 0.3;
 			}
 		}
 	}
@@ -220,46 +249,73 @@ double DefensiveStrategy(Board& board, Move move) {
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
 			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(i, newWord[1]))
-					perm += 0.5;
-				else if (board.getMultiplierWord(i, newWord[1]))
-					perm += 1.5;
+				if (board.getMultiplierLetter(i, newWord[1]) == 2)
+					perm += d_factor*0.4;
+				else if (board.getMultiplierLetter(i, newWord[1]) == 3)
+					perm += d_factor*0.8;
+				else if (board.getMultiplierWord(i, newWord[1]) == 2)
+					perm += d_factor*1.2;
+				else if (board.getMultiplierWord(i, newWord[1]) == 3)
+					perm += d_factor*1.6;
 			}
+			else n -= 0.02;
+			d_factor -= 0.3;
 		}
 		//under of the word
+		d_factor=1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
 			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(i, newWord[1]))
-					perm += 0.5;
-				else if (board.getMultiplierWord(i, newWord[1]))
-					perm += 1.5;
+				if (board.getMultiplierLetter(i, newWord[1]) == 2)
+					perm += d_factor*0.4;
+				else if (board.getMultiplierLetter(i, newWord[1]) == 3)
+					perm += d_factor*0.8;
+				else if (board.getMultiplierWord(i, newWord[1]) == 2)
+					perm += d_factor*1.2;
+				else if (board.getMultiplierWord(i, newWord[1]) == 3)
+					perm += d_factor*1.6;
 			}
+			else n -= 0.02;
+			d_factor -= 0.3;
 		}
 
 		//right to  the word
+		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board.getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(j, i))
-						perm += 0.5;
-					else if (board.getMultiplierWord(j, i))
-						perm += 1.5;
+					if (board.getMultiplierLetter(j, i)==2)
+						perm += d_factor*0.4;
+					else if (board.getMultiplierLetter(j, i)==3)
+						perm += d_factor*0.8;
+					else if (board.getMultiplierWord(j, i)==2)
+						perm += d_factor*1.2;
+					else if (board.getMultiplierWord(j, i) == 3)
+						perm += d_factor*1.6;
 				}
+				else n -= 0.02;
+				d_factor -= 0.3;
 			}
 		}
 		//left to the word
+		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board.getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(j, i))
-						perm += 0.5;
-					else if (board.getMultiplierWord(j, i))
-						perm += 1.5;
+					if (board.getMultiplierLetter(j, i) == 2)
+						perm += d_factor*0.4;
+					else if (board.getMultiplierLetter(j, i) == 3)
+						perm += d_factor*0.8;
+					else if (board.getMultiplierWord(j, i) == 2)
+						perm += d_factor*1.2;
+					else if (board.getMultiplierWord(j, i) == 3)
+						perm += d_factor*1.6;
 				}
+				else n -= 0.02;
+				d_factor -= 0.3;
 			}
 		}
 
