@@ -6,8 +6,8 @@
 #include<algorithm>
 #include <sstream>
 #include <time.h>
-#include "Judge.h"
-#include "Bag.h"
+#include "Judge/Judge.h"
+#include "Bag/Bag.h"
 
 using namespace std;
 
@@ -27,7 +27,27 @@ vector<pair<string, int>> getPossibleBingo() {
 
 }
 /// implement for ghada and walaa
+vector<pair<string, int> > filterPossibles(Bag &b,
+		vector<pair<string, int> >& vec, int cur[]) {
+	int freq[26];
+	memset(freq, 0, sizeof(freq));
+	vector<pair<string, int> > res;
+	for (int i = 0; i < vec.size(); ++i) {
+		memset(freq, 0, sizeof(freq));
+		for (int j = 0; j < vec[i].first.size(); ++j)
+			freq[vec[i].first[j] - st]++;
+		bool fnd = true;
+		for (int j = 0; j < 26; ++j)
+			if (((freq[j] < cur[j] || freq[j] > cur[j] + b.getTieScore(j)))) {
+				fnd = false;
+				break;
+			}
 
+		if (fnd)
+			res.push_back(vec[i]);
+	}
+	return res;
+}
 double calcProbability(int freq[], int score, Bag b, int cur[]) {
 
 	double letterP = 1;
@@ -45,18 +65,20 @@ double calcProbability(int freq[], int score, Bag b, int cur[]) {
 	return letterP * (50 + score);
 }
 // mmkn ab2a a3mlni class w a5ali m3aya nos5a ml bag object a7sn
-double expectedBingoMe(Bag b, string s, Player &player) {
-
+double expectedBingoMe(Bag& b, string s, Player &player) {
+	if (s.size() == 7)
+		return 0.0;
 	int freq[26], cur[26];
 	memset(freq, 0, sizeof(freq));
 	memset(cur, 0, sizeof(cur));
 	for (int i = 0; i < 26; ++i)
 		cur[i] = player.gitTie(i);
+
 	for (int i = 0; i < s.size(); ++i)
 		cur[s[i] - st]--;
 
 	vector<pair<string, int>> possible = getPossibleBingo();
-
+	possible = filterPossibles(b, possible, cur);
 	double p = 0;
 	for (int i = 0; i < possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
@@ -353,7 +375,7 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 						* ProbabilisticSearch(idx + 1, board, 0, ana, opponent,
 								b, 0);
 			} else {
-				int score = J.applyMove(move, board, opponent,b);
+				int score = J.applyMove(move, board, opponent, b);
 				ret -= p
 						* (ProbabilisticSearch(idx + 1, board, 0, ana, opponent,
 								b, 0) + score);
@@ -375,7 +397,7 @@ long double ProbabilisticSearch(int idx, Board & board, bool game, Player ana,
 								b, 0);
 
 			} else {
-				int score = J.applyMove(move, board, ana,b);
+				int score = J.applyMove(move, board, ana, b);
 				ret += p
 						* (ProbabilisticSearch(idx + 1, board, 1, ana, opponent,
 								b, 0) + score);
@@ -392,6 +414,7 @@ Move nextPlay(const vector<Move>&plays, Board board, Bag bag, Player ana,
 	if (!plays.size()) {
 		Move m;
 		m.tiles.push_back(getChange(ana));
+		m.switchMove = true;
 		return m;
 	}
 	long double mx = -1e18;

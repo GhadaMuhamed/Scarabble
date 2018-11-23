@@ -1,41 +1,44 @@
 #include <iostream>
-#include "Bag.h"
-#include "Board.h"
-#include "Player.h"
-#include "Judge.h"
-
-
+#include "Bag/Bag.h"
+#include "Board/Board.h"
+#include "Player/Player.h"
+#include "Judge/Judge.h"
 
 int main() {
-    Bag bag1 = Bag();
-    Bag bag2 = Bag();
+	Bag bag1 = Bag();
+	Bag bag2 = Bag();
 
-    Board board = Board();
-    board.initBoard();
-    cout << board;
-    cout << "----------------------------------------------\n";
-    cout << bag1;
-    cout << "----------------------------------------------\n";
+	Board board = Board();
+	board.initBoard();
+	cout << board;
+	cout << "----------------------------------------------\n";
+	cout << bag1;
+	cout << "----------------------------------------------\n";
 
-    Player player1 = Player(1);
-    int rand_7[7] = {2, 3, 6, 19, 'R'-'A', 'I'-'A', 26};
-    for (int i = 0; i < 7; ++i) {
-        bag1.removeTie(rand_7[i]);
-        if (!player1.addTie(rand_7[i])) cout << "How false?";
-    }
-    cout << player1;
-    cout << "----------------------------------------------\n";
-    player1.playTie(0);
-    board.putFirstTie(0);
-    cout << board;
-    cout << "----------------------------------------------\n";
-    Judge judge = Judge();
-    Move move; move.word = "RIHAM"; move.direction = 2; move.x = 4; move.y = 7;
-    judge.applyMove(move, board, player1, bag1);
-    cout << bag1;
-    cout << bag2;
-    bag2 = bag1;
-    cout << bag2;
+	Player player1 = Player(1);
+	int rand_7[7] = { 2, 3, 6, 19, 'R' - 'A', 'I' - 'A', 26 };
+	for (int i = 0; i < 7; ++i) {
+		bag1.removeTie(rand_7[i]);
+		if (!player1.addTie(rand_7[i]))
+			cout << "How false?";
+	}
+	cout << player1;
+	cout << "----------------------------------------------\n";
+	player1.playTie(0);
+	board.putFirstTie(0);
+	cout << board;
+	cout << "----------------------------------------------\n";
+	Judge judge = Judge();
+	Move move;
+	move.word = "RIHAM";
+	move.direction = 2;
+	move.x = 4;
+	move.y = 7;
+	judge.applyMove(move, board, player1, bag1);
+	cout << bag1;
+	cout << bag2;
+	bag2 = bag1;
+	cout << bag2;
 //    int posX, posY, tie;
 //    while (true) {
 //        cout << "Please, Enter the position you want play (X, Y) and the tie value. your current info is: ";
@@ -57,6 +60,6 @@ int main() {
 //        }
 //    }
 
-    cout << board;
-    return 0;
+	cout << board;
+	return 0;
 }

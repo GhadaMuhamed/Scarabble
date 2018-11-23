@@ -3,7 +3,7 @@
 //
 
 #include "Judge.h"
-#include "Bag.h"
+#include "../Bag/Bag.h"
 
 int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 	int score = 0, x = move.x, y = move.y;

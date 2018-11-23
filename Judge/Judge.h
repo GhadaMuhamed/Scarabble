@@ -6,10 +6,10 @@
 #define SCRABBLE_JUDGE_H
 
 
-#include "Bag.h"
-#include "Board.h"
-#include "Player.h"
-#include "Move.h"
+#include "../Bag/Bag.h"
+#include "../Board/Board.h"
+#include "../Player/Player.h"
+#include "../Move/Move.h"
 
 #define RIGHT   0
 #define LEFT    1
