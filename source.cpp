@@ -414,7 +414,6 @@ Move nextPlay(const vector<Move>&plays, Board board, Bag bag, Player ana,
 	if (!plays.size()) {
 		Move m;
 		m.tiles.push_back(getChange(ana));
-		m.switchMove = true;
 		return m;
 	}
 	long double mx = -1e18;
