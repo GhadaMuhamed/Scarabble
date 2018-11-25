@@ -3,11 +3,11 @@
 #include "Board/Board.h"
 #include "Player/Player.h"
 #include "Judge/Judge.h"
-
+#include "Dictionary/dictionary.h"
 int main() {
 	Bag bag1 = Bag();
 	Bag bag2 = Bag();
-
+	dictionary d("sowpods.txt");
 	Board board = Board();
 	board.initBoard();
 	cout << board;

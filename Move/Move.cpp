@@ -14,5 +14,12 @@ Move::Move() {
 	word = "";
 }
 
-
+Move::Move(int x, int y, bool direction, string playedWord, string word) {
+	switchMove = false;
+	this->x = x;
+	this->y = y;
+	this->direction = direction;
+	this->word = word;
+	this->playedWord = playedWord;
+}
 
