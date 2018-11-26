@@ -381,7 +381,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		}
 
 	}
-	return -perm;
+	return -n*perm;
 }
 
 double Heuristic::getHeu(Move& m, Player& player) {
