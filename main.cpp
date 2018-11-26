@@ -4,6 +4,7 @@
 #include "Player/Player.h"
 #include "Judge/Judge.h"
 #include "Dictionary/dictionary.h"
+
 int main() {
 	Bag bag1 = Bag();
 	Bag bag2 = Bag();
