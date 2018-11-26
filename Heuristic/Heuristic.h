@@ -21,19 +21,21 @@ class Heuristic {
 	Judge J;
 	const char st = 'A';
 	const string mostUsedLetters = "etaoinshrdlcumwfgypbvkjxqz";
-
+	int state;
 public:
 	Heuristic(Board, dictionary, Bag, Judge);
-	vector<pair<string, int>> getPossibleBingo(string str,int cut[]);
+	vector<pair<string, int>> getPossibleBingo(string str, int cut[]);
 	bool filterPossibles(string s, int cur[]);
 	double calcProbability(int freq[], int score, int cur[]);
-	double expectedBingoMe(string s, Player &player);
+	double expectedBingoMe(Move& move, Player &player);
 	double expectedBingoOpponent();
 	double RackLeaveScore(string C);
 	char getChange(Player& p);
 	void setBoard(Board b);
 	void setBag(Bag b);
-	vector<Move> getAllMoves();
+	double QwithU(string m);
+	double getHeu(Move& m, Player& plaler);
+	vector<Move> getAllMoves(Player& p);
 	double DefensiveStrategy(Move move);
 
 	virtual ~Heuristic();
