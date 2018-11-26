@@ -227,7 +227,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	 rest of number are column indexes in case of horizontal
 	 and row indexes in case of vertical
 	 */
-	int d_factor = 1;
+	double d_factor = 1;
 	double n = 1;
 //horizontal word
 	if (newWord[0] == 0) {
