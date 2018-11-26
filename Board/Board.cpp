@@ -59,7 +59,7 @@ int Board::getBoardValue(int posX, int posY) {
 }
 
 bool Board::putFirstTie(int tie) {
-	if (board[starPos][starPos] != -1)
+	if (tie < 0 || tie > 26 || board[starPos][starPos] != -1)
 		return false;
 	board[starPos][starPos] = tie;
 	ties_count++;
@@ -67,7 +67,8 @@ bool Board::putFirstTie(int tie) {
 }
 
 bool Board::putTie(int posX, int posY, int tie) {
-	if (board[posX][posY] != -1 || !isValidMove(posX, posY, tie))
+	if (tie < 0 || tie > 26 || posX < 0 || posX >= 15 || posY < 0 || posY >= 15
+			|| board[posX][posY] != -1 || !isValidMove(posX, posY, tie))
 		return false;
 	board[posX][posY] = tie;
 	ties_count++;
@@ -75,7 +76,7 @@ bool Board::putTie(int posX, int posY, int tie) {
 }
 
 bool Board::putTieMove(int posX, int posY, int tie) {
-	if (board[posX][posY] != -1)
+	if (tie < 0 || tie > 26 || board[posX][posY] != -1)
 		return false;
 	board[posX][posY] = tie;
 	ties_count++;

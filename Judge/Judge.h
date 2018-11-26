@@ -20,7 +20,8 @@ class Judge {
 public:
     long long pascal[101][101];
     int applyMove(const Move &move, Board &board, Player &player, Bag &bag);
-	bool isClosed(Board &board);
+    int applyMoveMin(const Move &move, Board &board, Bag &bag);
+    bool isClosed(Board &board);
 	void nCr();
 };
 

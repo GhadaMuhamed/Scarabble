@@ -10,7 +10,7 @@ Player::Player(int playerId) :
 }
 
 bool Player::addTie(int tie) {
-	if (totalTies >= PLAYER_TIES_SIZE)
+	if (totalTies >= PLAYER_TIES_SIZE || tie < 0 || tie > 26)
 		return false;
 	myTies[tie]++;
 	totalTies++;
@@ -18,7 +18,7 @@ bool Player::addTie(int tie) {
 }
 
 bool Player::playTie(int tie) {
-	if (myTies[tie] <= 0)
+	if (tie < 0 || tie > 26 || myTies[tie] <= 0)
 		return false; // the player doesn't have any ties yet
 	myTies[tie]--;
 	totalTies--;
@@ -28,8 +28,24 @@ bool Player::playTie(int tie) {
 int Player::getTotalTies() {
 	return totalTies;
 }
-int Player::gitTie(int pos) {
+
+int Player::getScore() {
+	return score;
+}
+
+void Player::addScore(int scr) {
+	score += scr;
+}
+
+void Player::putScore(int newScr) {
+	score = newScr;
+}
+
+int Player::getTie(int pos) {
+	if (pos < 0 || pos > 26)
+		return -1;
 	return myTies[pos];
+
 }
 
 ostream& operator<<(ostream& os, Player const& myObj) {

@@ -81,7 +81,7 @@ double Heuristic::expectedBingoMe(string s, Player &player) {
 	memset(freq, 0, sizeof(freq));
 	memset(cur, 0, sizeof(cur));
 	for (int i = 0; i < 26; ++i)
-		cur[i] = player.gitTie(i);
+		cur[i] = player.getTie(i);
 	string curStr = "";
 	for (int i = 0; i < s.size(); ++i)
 		cur[s[i] - st]--;
@@ -363,7 +363,7 @@ vector<Move> Heuristic::getAllMoves() {
 }
 char Heuristic::getChange(Player& p) {
 	for (int i = mostUsedLetters.size() - 1; i >= 0; --i)
-		if (p.gitTie(mostUsedLetters[i] - st))
+		if (p.getTie(mostUsedLetters[i] - st))
 			return mostUsedLetters[i];
 
 }
