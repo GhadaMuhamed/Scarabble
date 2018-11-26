@@ -27,6 +27,7 @@ public:
 	void addScore(int scr);
 	void putScore(int newScr);
 	int getTie(int pos);
+	string getTieStr();
 	friend ostream& operator<<(ostream& os, Player const& myObj);
 };
 

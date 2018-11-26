@@ -28,7 +28,7 @@ public:
 	bool filterPossibles(string s, int cur[]);
 	double calcProbability(int freq[], int score, int cur[]);
 	double expectedBingoMe(string s, Player &player);
-	int expectedBingoOpponent();
+	double expectedBingoOpponent();
 	double RackLeaveScore(string C);
 	char getChange(Player& p);
 	void setBoard(Board b);

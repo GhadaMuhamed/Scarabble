@@ -7,7 +7,7 @@
 
 int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 	int score = 0, x = move.x, y = move.y;
-	string word = move.word;
+	string word = move.playedWord;
 	if (move.switchMove || word.size() == 0)
 		return 0;
 	int wordMultiplier = 1;
@@ -43,7 +43,7 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 }
 int Judge::applyMoveMin(const Move &move, Board &board, Bag &bag) {
 	int score = 0, x = move.x, y = move.y;
-	string word = move.word;
+	string word = move.playedWord;
 	if (move.switchMove || (int) word.size() == 0)
 		return 0;
 	int wordMultiplier = 1;

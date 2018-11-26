@@ -47,6 +47,16 @@ int Player::getTie(int pos) {
 	return myTies[pos];
 
 }
+string Player::getTieStr() {
+	string s = "";
+	for (int i = 0; i < 26; ++i)
+		for (int j = 0; j < myTies[i]; ++j)
+			s += ('A' + i);
+
+	if (myTies[26])
+		s += 'e';
+	return s;
+}
 
 ostream& operator<<(ostream& os, Player const& myObj) {
 	os << "\nPlayer: " << myObj.playerId << "\ttotal number of ties: "

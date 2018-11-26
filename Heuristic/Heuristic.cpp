@@ -49,7 +49,7 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
-		int score = 0;
+		int score = J.applyMoveMin(v[i], board, bag);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}
@@ -73,7 +73,6 @@ double Heuristic::calcProbability(int freq[], int score, int cur[]) {
 // multiply by 2.5 if the score isn't calculated for the board
 	return letterP * (50 + score);
 }
-// mmkn ab2a a3mlni class w a5ali m3aya nos5a ml bag object a7sn
 double Heuristic::expectedBingoMe(string s, Player &player) {
 	if (s.size() == 7)
 		return 0.0;
@@ -103,14 +102,13 @@ double Heuristic::expectedBingoMe(string s, Player &player) {
 	}
 	return p * 0.8; // multiply  p * 0.8 assuming prob of bingo in the next play will decrease by 0.2
 }
-int Heuristic::expectedBingoOpponent() {
-	vector<pair<string, int>> possible; //= getPossibleBingo();
-//////--------------- not so sure
+double Heuristic::expectedBingoOpponent() {
+	vector<pair<string, int>> possible = getPossibleBingo();
 	int mx = -1;
 	for (int i = 0; i < possible.size(); ++i) {
 		mx = max(mx, possible[i].second);
 	}
-	return -mx;
+	return -mx * 0.6;
 // eb3ty el mx
 //////////////// mfrod ab3t el exScore
 }
