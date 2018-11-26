@@ -13,6 +13,7 @@ Heuristic::Heuristic(Board b, dictionary d, Bag bg, Judge j) {
 	dec = d;
 	bag = bg;
 	J = j;
+	state = 0;
 }
 
 Heuristic::~Heuristic() {
@@ -73,24 +74,27 @@ double Heuristic::calcProbability(int freq[], int score, int cur[]) {
 // multiply by 2.5 if the score isn't calculated for the board
 	return letterP * (50 + score);
 }
-double Heuristic::expectedBingoMe(string s, Player &player) {
-	if (s.size() == 7)
+double Heuristic::expectedBingoMe(Move& move, Player &player) {
+	string word = move.word;
+	if (move.playedWord.size() == 7)
 		return 0.0;
 	int freq[27], cur[27];
-	memset(freq, 0, sizeof(freq));
 	memset(cur, 0, sizeof(cur));
-	for (int i = 0; i < 26; ++i)
-		cur[i] = player.getTie(i);
-	string curStr = "";
-	for (int i = 0; i < s.size(); ++i)
-		cur[s[i] - st]--;
-	for (int i = 0; i < 26; ++i)
-		for (int j = 0; j < cur[i]; ++j)
-			curStr += char(i + st);
-	if (cur[26])
-		curStr += 'e';
-	vector<pair<string, int>> possible = getPossibleBingo(curStr, cur);
-//possible = filterPossibles(possible, cur);
+	for (int i = 0; i < word.size(); ++i)
+		if (word[i] == 'e')
+			cur[26]++;
+		else
+			cur[word[i] - st]++;
+	//string curStr = "";
+	//for (int i = 0; i < word.size(); ++i)
+	//cur[word[i] - st]--;
+	/*for (int i = 0; i < 26; ++i)
+	 for (int j = 0; j < cur[i]; ++j)
+	 curStr += char(i + st);
+	 if (cur[26])
+	 curStr += 'e';*/
+	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
+	//possible = filterPossibles(possible, cur);
 	double p = 0;
 	for (int i = 0; i < possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
@@ -100,15 +104,29 @@ double Heuristic::expectedBingoMe(string s, Player &player) {
 		// calculate the expected number of the score to make this word
 		p += calcProbability(freq, possible[i].second, cur);
 	}
-	return p * 0.8; // multiply  p * 0.8 assuming prob of bingo in the next play will decrease by 0.2
+	return p; // multiply  p * 0.8 assuming prob of bingo in the next play will decrease by 0.2
+}
+double Heuristic::QwithU(string m) {
+	int cntQ = 0;
+	int cntU = 0;
+
+	for (int i = 0; i < m.size(); ++i)
+		if (m[i] == 'Q')
+			cntQ++;
+		else if (m[i] == 'U')
+			cntU++;
+	if (cntQ && cntU)
+		return 30.0;
+	else
+		return 0.0;
 }
 double Heuristic::expectedBingoOpponent() {
-	vector<pair<string, int>> possible = getPossibleBingo();
+	vector<pair<string, int>> possible; //= getPossibleBingo();
 	int mx = -1;
 	for (int i = 0; i < possible.size(); ++i) {
 		mx = max(mx, possible[i].second);
 	}
-	return -mx * 0.6;
+	return -mx;
 // eb3ty el mx
 //////////////// mfrod ab3t el exScore
 }
@@ -176,7 +194,17 @@ double Heuristic::RackLeaveScore(string C) {
 
 	return score;
 }
+vector<Move> Heuristic::getAllMoves(Player& p) {
+	dec.execute(board, p.getTieStr());
+	vector<Move> v = dec.getVector();
+	return v;
+}
+char Heuristic::getChange(Player& p) {
+	for (int i = mostUsedLetters.size() - 1; i >= 0; --i)
+		if (p.getTie(mostUsedLetters[i] - st))
+			return mostUsedLetters[i];
 
+}
 //----------------------->will be modified later depending on what will bs sent
 double Heuristic::DefensiveStrategy(Move move) {
 	double perm = 0.0;
@@ -355,13 +383,14 @@ double Heuristic::DefensiveStrategy(Move move) {
 	}
 	return -perm;
 }
-vector<Move> Heuristic::getAllMoves() {
-	vector<Move> v;
-	return v;
-}
-char Heuristic::getChange(Player& p) {
-	for (int i = mostUsedLetters.size() - 1; i >= 0; --i)
-		if (p.getTie(mostUsedLetters[i] - st))
-			return mostUsedLetters[i];
 
+double Heuristic::getHeu(Move& m, Player& player) {
+	// lma omnia trod 3alia hashof expented bingo opponenet
+
+	double ds = 0;
+	if (state == 0)
+		ds = DefensiveStrategy(m);
+	double num = 0.8 * expectedBingoMe(m, player) + ds + RackLeaveScore(m.word)
+			+ 0.5 * QwithU(m.playedWord);
+	return num;
 }

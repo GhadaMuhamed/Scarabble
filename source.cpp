@@ -17,20 +17,17 @@ using namespace std;
 Judge J;
 dictionary dec;
 //Heuristic heu;
-Move huristicMoves(Heuristic heu, Board board, Player ana, Player opponent,
+Move huristicMoves(Heuristic& heu, Board& board, Player& ana, Player& opponent,
 		Bag b) {
 	string C;
-	vector<Move> allMoves = heu.getAllMoves();
-	Move BestMove;
-	int mx = -1;
 	heu.setBoard(board);
 	heu.setBag(b);
+	vector<Move> allMoves = heu.getAllMoves(ana);
+	Move BestMove;
+	int mx = -1;
 
 	for (int i = 0; i < allMoves.size(); ++i) {
-		float num = heu.expectedBingoMe(allMoves[i].word, ana)
-				+ heu.expectedBingoOpponent()
-				+ heu.DefensiveStrategy(allMoves[i])
-				+ heu.RackLeaveScore(allMoves[i].word);
+		float num = heu.getHeu(allMoves[i],ana);
 		if (num > mx)
 			mx = num, BestMove = allMoves[i];
 	}
