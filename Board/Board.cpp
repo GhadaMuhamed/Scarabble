@@ -23,6 +23,7 @@ Board::Board() {
 	}
 }
 
+
 void Board::initBoard() {
 //    update board with 3xL
 	for (auto &it : _3xL) {
