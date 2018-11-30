@@ -50,7 +50,7 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
-		int score = J.applyMoveMin(v[i], board, bag);
+		int score = J.applyMoveNoChange(v[i], board, bag);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}

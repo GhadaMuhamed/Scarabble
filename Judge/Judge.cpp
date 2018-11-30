@@ -6,9 +6,10 @@
 #include "../Bag/Bag.h"
 
 int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
-	int score = 0, x = move.x, y = move.y;
+    // it applies the move and do changes on the variables
+	int score = 0, x = move.x, y = move.y, playerTiesCnt = 0;
 	string word = move.playedWord;
-	if (move.switchMove || word.size() == 0)
+	if (move.switchMove || word.empty())
 		return 0;
 	int wordMultiplier = 1;
 	if (move.direction == RIGHT) {
@@ -17,7 +18,8 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 		while (cnt < word.size()) {
 			// if it's successfully put then it was empty place, so remove it from the player
 			int tie = int(word[cnt] - 'A');
-			if (board.putTieMove(x, y, tie)) {
+			if (board.applyMove(x, y, tie)) {
+				playerTiesCnt++;
 				player.playTie(tie);
 			}
 			score += board.getMultiplierLetter(x, y) * bag.getTieScore(tie);
@@ -29,7 +31,8 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 		int cnt = 0;
 		while (cnt < word.size()) {
 			int tie = int(word[cnt] - 'A');
-			if (board.putTieMove(x, y, tie)) {
+			if (board.applyMove(x, y, tie)) {
+				playerTiesCnt++;
 				player.playTie(tie);
 			}
 			score += board.getMultiplierLetter(x, y) * bag.getTieScore(tie);
@@ -38,21 +41,30 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 		}
 
 	}
+	// if the player played all of its rock then the score increases by 50
+	if (playerTiesCnt == 7) score += 50;
 
 	return score * wordMultiplier;
 }
-int Judge::applyMoveMin(const Move &move, Board &board, Bag &bag) {
-	int score = 0, x = move.x, y = move.y;
+int Judge::applyMoveNoChange(const Move &move, Board &board, Bag &bag) {
+    // it applies the move without doing any changes on the variables
+	int score = 0, x = move.x, y = move.y, playerTiesCnt = 0;
 	string word = move.playedWord;
-	if (move.switchMove || (int) word.size() == 0)
-		return 0;
 	int wordMultiplier = 1;
+
+	if (move.switchMove || word.empty()) {
+		return 0;
+	}
+
 	if (move.direction == RIGHT) {
 		// right
 		int cnt = 0;
 		while (cnt < word.size()) {
-			// if it's successfully put then it was empty place, so remove it from the player
 			int tie = int(word[cnt] - 'A');
+			if (board.getBoardValue(x, y) == -1) {
+				// then it's empty, so the player is playing this
+				playerTiesCnt++;
+			}
 			score += board.getMultiplierLetter(x, y) * bag.getTieScore(tie);
 			wordMultiplier *= board.getMultiplierWord(x, y);
 			y++, cnt++;
@@ -62,13 +74,18 @@ int Judge::applyMoveMin(const Move &move, Board &board, Bag &bag) {
 		int cnt = 0;
 		while (cnt < word.size()) {
 			int tie = int(word[cnt] - 'A');
+			if (board.getBoardValue(x, y) == -1) {
+				// then it's empty, so the player is playing this
+				playerTiesCnt++;
+			}
 			score += board.getMultiplierLetter(x, y) * bag.getTieScore(tie);
 			wordMultiplier *= board.getMultiplierWord(x, y);
 			x++, cnt++;
 		}
 
 	}
-
+	// if the player played all of its rock then the score increases by 50
+	if (playerTiesCnt == 7) score += 50;
 	return score * wordMultiplier;
 }
 

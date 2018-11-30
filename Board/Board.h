@@ -46,11 +46,12 @@ public:
     friend ostream& operator<<(ostream& os, Board const& myObj);
     bool putFirstTie(int tie);
     bool putTie(int posX, int posY, int tie);
-    bool putTieMove(int posX, int posY, int tie);
+    bool applyMove(int posX, int posY, int tie);
     bool isValidMove(int posX, int posY, int tie);
     int getBoardValue(int posX,int posY);
     string getHorizontalWord(int posX, int posY);
     string getVerticalWord(int posX, int posY);
+    bool isValidPos(int tie, int posX, int posY);
     bool isValidWords(string& horWord, string& verWord);
     int getMultiplierLetter(int posX, int posY);
     int getMultiplierWord(int posX, int posY);

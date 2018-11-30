@@ -9,19 +9,19 @@
 
 Communcation::Communcation() {
 	// TODO Auto-generated constructor stub
-	board = NULL;
+	board = nullptr;
 
 }
 void Communcation::start(commToImp c) {
 	// start or disconnect
 	if (c.Msgtype == 1 || c.Msgtype == 12) {
-		board = new Board(c.Board_from_server);
+//		board = new Board(c.Board_from_server);
 
 	}
 }
 
 Communcation::~Communcation() {
-	if (board != NULL)
+	if (board != nullptr)
 		delete board;
 	// TODO Auto-generated destructor stub
 }

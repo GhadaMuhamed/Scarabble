@@ -5,26 +5,27 @@
 #include "Board.h"
 
 Board::Board() {
-	// init multiplier letter as 1
-	for (auto& i : multiplier_letter) {
-		for (auto& j : i) {
-			j = 1;
-		}
-	}
-	for (auto& i : multiplier_word) {
-		for (auto& j : i) {
-			j = 1;
-		}
-	}
-	for (auto &i : board) {
-		for (auto &j : i) {
-			j = -1;
-		}
-	}
+
 }
 
 
 void Board::initBoard() {
+    // init multiplier letter as 1
+    for (auto& i : multiplier_letter) {
+        for (auto& j : i) {
+            j = 1;
+        }
+    }
+    for (auto& i : multiplier_word) {
+        for (auto& j : i) {
+            j = 1;
+        }
+    }
+    for (auto &i : board) {
+        for (auto &j : i) {
+            j = -1;
+        }
+    }
 //    update board with 3xL
 	for (auto &it : _3xL) {
 		multiplier_letter[it.first - 1][it.second - 1] = 3;
@@ -56,6 +57,7 @@ ostream& operator<<(ostream& os, Board const& myObj) {
 	return os;
 }
 int Board::getBoardValue(int posX, int posY) {
+    // if this position on the board isn't occupied the it's -1 otherwise it's already occupied.
 	return board[posX][posY];
 }
 
@@ -67,18 +69,20 @@ bool Board::putFirstTie(int tie) {
 	return true;
 }
 
+bool Board::isValidPos(int tie, int posX, int posY) {
+    return tie >= 0 && tie < 27 && posX >= 0 && posX < 15 && posY >= 0 && posY < 15;
+}
+
 bool Board::putTie(int posX, int posY, int tie) {
-	if (tie < 0 || tie > 26 || posX < 0 || posX >= 15 || posY < 0 || posY >= 15
-			|| board[posX][posY] != -1 || !isValidMove(posX, posY, tie))
+    // checks that this move is valid before applying it
+	if (!isValidPos(tie, posX, posY)|| board[posX][posY] != -1 || !isValidMove(posX, posY, tie))
 		return false;
-	board[posX][posY] = tie;
-	ties_count++;
+	applyMove(posX, posY, tie);
 	return true;
 }
 
-bool Board::putTieMove(int posX, int posY, int tie) {
-	if (tie < 0 || tie > 26 || board[posX][posY] != -1)
-		return false;
+bool Board::applyMove(int posX, int posY, int tie) {
+	// it puts the tie without checking whether it's a valid move or not
 	board[posX][posY] = tie;
 	ties_count++;
 	return true;
