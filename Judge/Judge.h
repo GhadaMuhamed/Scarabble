@@ -12,7 +12,7 @@
 #include "../Move/Move.h"
 
 #define RIGHT   0
-#define UP      1
+#define DOWN      1
 
 class Judge {
 public:

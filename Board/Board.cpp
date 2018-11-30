@@ -4,10 +4,6 @@
 
 #include "Board.h"
 
-Board::Board() {
-
-}
-
 
 void Board::initBoard() {
     // init multiplier letter as 1
@@ -48,13 +44,13 @@ void Board::initBoard() {
 }
 
 ostream& operator<<(ostream& os, Board const& myObj) {
-	for (auto &i : myObj.board) {
-		for (int j : i) {
-			os << char(j + 'A') << " ";
-		}
-		os << endl;
-	}
-	return os;
+    for (auto &i : myObj.board) {
+        for (int j : i) {
+            os << myObj.scores[j] << char(j + 'A') << " ";
+        }
+        os << endl;
+    }
+    return os;
 }
 int Board::getBoardValue(int posX, int posY) {
     // if this position on the board isn't occupied the it's -1 otherwise it's already occupied.
@@ -81,11 +77,10 @@ bool Board::putTie(int posX, int posY, int tie) {
 	return true;
 }
 
-bool Board::applyMove(int posX, int posY, int tie) {
+void Board::applyMove(int posX, int posY, int tie) {
 	// it puts the tie without checking whether it's a valid move or not
 	board[posX][posY] = tie;
 	ties_count++;
-	return true;
 }
 
 bool Board::isValidMove(int posX, int posY, int tie) {
@@ -131,6 +126,42 @@ string Board::getVerticalWord(int posX, int posY) {
 		r++;
 	}
 	return verticalWord;
+}
+
+int Board::getHorizontalWordScore(int posX, int posY) {
+	int horizontalWordScore = 0, wordMultiplier = 1;
+
+	int r = posX, c = posY - 1;
+	while (c >= 0 && board[r][c] != -1) {
+        horizontalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+        wordMultiplier *= multiplier_word[r][c];
+		c--;
+	}
+	c = posY + 1;
+	while (c < BOARD_SIZE && board[r][c] != -1) {
+        horizontalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+        wordMultiplier *= multiplier_word[r][c];
+		c++;
+	}
+	return horizontalWordScore * wordMultiplier;
+}
+
+int Board::getVerticalWordScore(int posX, int posY) {
+	int verticalWordScore = 0, wordMultiplier = 1;
+
+	int r = posX - 1, c = posY;
+	while (r >= 0 && board[r][c] != -1) {
+        verticalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+        wordMultiplier *= multiplier_word[r][c];
+		r--;
+	}
+	r = posX + 1;
+	while (r < BOARD_SIZE && board[r][c] != -1) {
+		verticalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+        wordMultiplier *= multiplier_word[r][c];
+		r++;
+	}
+	return verticalWordScore * wordMultiplier;
 }
 
 bool Board::isValidWords(string& horWord, string& verWord) {

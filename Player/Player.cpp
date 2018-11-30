@@ -19,7 +19,7 @@ bool Player::addTie(int tie) {
 
 bool Player::playTie(int tie) {
 	if (tie < 0 || tie > 26 || myTies[tie] <= 0)
-		return false; // the player doesn't have any ties yet
+		return false; // the player doesn't have any ties
 	myTies[tie]--;
 	totalTies--;
 	return true;

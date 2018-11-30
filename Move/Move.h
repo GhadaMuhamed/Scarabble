@@ -17,7 +17,7 @@
 #include <sstream>
 using namespace std;
 struct Move {
-	string word,playedWord;
+	string word, playedWord;
 	int x, y;
 	bool direction;
 	bool switchMove;
