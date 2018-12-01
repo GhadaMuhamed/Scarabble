@@ -68,6 +68,7 @@ bool Heuristic::filterPossibles(string s, int cur[]) {
 			return false;
 
 	return true;
+
 }
 ///implement for omnia
 // btgeeb kol el strings eli mn 7 chars eli law et7tet fl board t3ml bingo

@@ -50,3 +50,4 @@ public:
 };
 
 #endif /* HEURISTIC_H_ */
+
