@@ -1,14 +1,38 @@
+#pragma once
 //
 // Created by riham on 24/10/18.
 //
 
-#include "Player.h"
 
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <vector>
+#include <set>
+#include<fstream>
+#include <string>
+#include <sstream>
+#include <cstring>
+#include<map>
+#include<queue>
+#include<math.h>
+#include<algorithm>
+#include "Player.h"
 Player::Player(int playerId) :
-		playerId(playerId) {
+	playerId(playerId) {
 	memset(myTies, 0, sizeof myTies);
 }
 
+void Player::addValue(int v, int tie) {
+
+	myTies[tie] = v;
+}
+int Player::getValue( int tie) {
+
+	return myTies[tie] ;
+}
+int Player::getPlayerID() {
+	return playerId;
+}
 bool Player::addTie(int tie) {
 	if (totalTies >= PLAYER_TIES_SIZE || tie < 0 || tie > 26)
 		return false;
@@ -60,11 +84,11 @@ string Player::getTieStr() {
 
 ostream& operator<<(ostream& os, Player const& myObj) {
 	os << "\nPlayer: " << myObj.playerId << "\ttotal number of ties: "
-			<< myObj.totalTies << "\t ties: ";
+		<< myObj.totalTies << "\t ties: ";
 	for (int i = 0; i < 27; i++) {
 		if (myObj.myTies[i] != 0) {
 			os << "( char=" << char(i + 'A') << ", count=" << myObj.myTies[i]
-					<< " ) ";
+				<< " ) ";
 		}
 	}
 	os << endl;

@@ -1,3 +1,4 @@
+#pragma once
 //
 // Created by riham on 24/10/18.
 //
@@ -5,7 +6,8 @@
 #ifndef SCRABBLE_PLAYER_H
 #define SCRABBLE_PLAYER_H
 
-#include<bits/stdc++.h>
+
+
 
 using namespace std;
 
@@ -28,6 +30,9 @@ public:
 	void putScore(int newScr);
 	int getTie(int pos);
 	string getTieStr();
+	void addValue(int v,int tie);
+	int getValue (int tie);
+	int getPlayerID();
 	friend ostream& operator<<(ostream& os, Player const& myObj);
 };
 
