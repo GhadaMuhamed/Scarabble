@@ -6,44 +6,47 @@
 
 Board::Board() {
 	// init multiplier letter as 1
-	for (auto& i : multiplier_letter) {
-		for (auto& j : i) {
+	for (auto& i : multiplier_letter)
+		for (auto& j : i)
 			j = 1;
-		}
-	}
-	for (auto& i : multiplier_word) {
-		for (auto& j : i) {
+
+	for (auto& i : multiplier_word)
+		for (auto& j : i)
 			j = 1;
-		}
-	}
-	for (auto &i : board) {
-		for (auto &j : i) {
+
+	for (auto &i : board)
+		for (auto &j : i)
 			j = -1;
-		}
-	}
+
 }
 
+Board::Board(int b[][BOARD_SIZE]) {
+	for (int i = 0; i < BOARD_SIZE; ++i)
+		for (int j = 0; j < BOARD_SIZE; ++j) {
+			board[i][j] = b[i][j];
+		}
+}
 
 void Board::initBoard() {
 //    update board with 3xL
-	for (auto &it : _3xL) {
+	for (auto &it : _3xL)
 		multiplier_letter[it.first - 1][it.second - 1] = 3;
-	}
+
 //    update board with 2xL
-	for (auto &it : _2xL) {
+	for (auto &it : _2xL)
 		multiplier_letter[it.first - 1][it.second - 1] = 2;
-	}
+
 ////////////////////////////////////////////
 //    update board with 3xW
 //    it triples the score of the current word
-	for (auto &it : _3xW) {
+	for (auto &it : _3xW)
 		multiplier_word[it.first - 1][it.second - 1] = 3;
-	}
+
 //    update board with 2xW
 //    it doubles the score of the current word
-	for (auto it : _2xW) {
+	for (auto it : _2xW)
 		multiplier_word[it.first - 1][it.second - 1] = 2;
-	}
+
 }
 
 ostream& operator<<(ostream& os, Board const& myObj) {
@@ -99,7 +102,7 @@ bool Board::isValidMove(int posX, int posY, int tie) {
 }
 
 string Board::getHorizontalWord(int posX, int posY) {
-	string horizontalWord;
+	string horizontalWord = "";
 	int r = posX, c = posY;
 	// if it's a blank tie it should be handled to be replaced by a suitable char
 	while (c >= 0 && board[r][c] != -1) {
@@ -115,7 +118,7 @@ string Board::getHorizontalWord(int posX, int posY) {
 }
 
 string Board::getVerticalWord(int posX, int posY) {
-	string verticalWord;
+	string verticalWord = "";
 	int r = posX, c = posY;
 	while (r >= 0 && board[r][c] != -1) {
 		verticalWord = char(board[r][c] + 'A') + verticalWord;

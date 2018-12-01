@@ -29,7 +29,7 @@ int main() {
 	board.putFirstTie(0);
 	cout << board;
 	cout << "----------------------------------------------\n";
-	Judge judge = Judge();
+	Judge judge = Judge(200,200);
 	Move move;
 	move.word = "RIHAM";
 	move.direction = 2;

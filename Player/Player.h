@@ -20,6 +20,8 @@ class Player {
 	int score = 0;
 public:
 	Player(int playerId);
+	Player();
+
 	bool addTie(int tie);
 	int getTotalTies();
 	bool playTie(int tie);

@@ -14,7 +14,7 @@ using namespace std;
 
 # define depth 10
 # define S 10
-Judge J;
+Judge J(200, 200);
 dictionary dec;
 //Heuristic heu;
 Move huristicMoves(Heuristic& heu, Board& board, Player& ana, Player& opponent,
@@ -22,14 +22,18 @@ Move huristicMoves(Heuristic& heu, Board& board, Player& ana, Player& opponent,
 	string C;
 	heu.setBoard(board);
 	heu.setBag(b);
-	vector<Move> allMoves = heu.getAllMoves(ana);
+	heu.setPlayer(ana);
+	vector<Move> allMoves = heu.getAllMoves();
 	Move BestMove;
 	int mx = -1;
 
 	for (int i = 0; i < allMoves.size(); ++i) {
-		float num = heu.getHeu(allMoves[i],ana);
+		float num = heu.getHeu(allMoves[i]);
 		if (num > mx)
 			mx = num, BestMove = allMoves[i];
+		heu.setBoard(board);
+		heu.setBag(b);
+		heu.setPlayer(ana);
 	}
 	return BestMove;
 }
@@ -136,7 +140,12 @@ Move nextPlay(Heuristic& heu, const vector<Move>&plays, Board board, Bag bag,
 		Player ana, Judge j) {
 	if (!plays.size()) {
 		Move m;
-		m.tiles.push_back(heu.getChange(ana));
+		heu.setPlayer(ana);
+		char* ex = new char[7];
+		if (strlen(ex) == 0)
+			m.switchMove = true;
+		for (int i = 0; i < strlen(ex); ++i)
+			m.tiles.push_back(ex[i]);
 		return m;
 	}
 	long double mx = -1e18;

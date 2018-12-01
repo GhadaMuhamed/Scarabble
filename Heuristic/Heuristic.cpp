@@ -7,31 +7,64 @@
 #include "Heuristic.h"
 #include<bits/stdc++.h>
 using namespace std;
-Heuristic::Heuristic(Board b, dictionary d, Bag bg, Judge j) {
+Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
+		Player& p2) {
 	// TODO Auto-generated constructor stub
-	board = b;
-	dec = d;
-	bag = bg;
-	J = j;
+	board = &b;
+	dec = &d;
+	bag = &bg;
+	J = (&j);
 	state = 0;
+	player = &p;
+	opponent = &p2;
+	//The weights for the first occurence of a letter
+	// * means blank
+	map<char, double> LL1 { { 'a', 1.0 }, { 'b', -3.5 }, { 'c', -0.5 }, { 'd',
+			0.0 }, { 'e', 4.0 }, { 'f', -2.0 }, { 'g', -2.0 }, { 'h', 0.5 }, {
+			'i', -0.5 }, { 'j', -3.0 }, { 'k', -2.5 }, { 'l', -1.0 }, { 'm',
+			-1.0 }, { 'n', 0.5 }, { 'o', -1.5 }, { 'p', -1.5 }, { 'q', -11.5 },
+			{ 'r', 1.5 }, { 's', 7.5 }, { 't', 0.0 }, { 'u', -3.0 },
+			{ 'v', -5.5 }, { 'w', -4.0 }, { 'x', 3.5 }, { 'y', -2.0 }, { 'z',
+					2.0 }, { '*', 24.5 } // '*' means blank
+	};
+
+	//Duplicate weights
+	map<char, double> LL2 { { 'a', -3.0 }, { 'b', -3.0 }, { 'c', -3.5 }, { 'd',
+			-2.5 }, { 'e', -2.5 }, { 'f', -2.0 }, { 'g', -2.5 }, { 'h', -3.5 },
+			{ 'i', -4.0 }, { 'j', 0.0 }, { 'k', 0 }, { 'l', -2.0 },
+			{ 'm', -2.0 }, { 'n', -2.5 }, { 'o', -3.5 }, { 'p', -2.5 },
+			{ 'q', 0 }, { 'r', -3.5 }, { 's', -4.0 }, { 't', -2.5 },
+			{ 'u', -3.0 }, { 'v', -3.5 }, { 'w', -4.5 }, { 'x', 0 },
+			{ 'y', -4.5 }, { 'z', 0 }, { '*', 15.0 } };
+	/*j,k,q,x,z mknsh lehm rkm w 5lthm bzero,mmkn ab2a ashelhm mn lmap dh
+	 w a5od rkmhm mn fo2 k2nhm msh duplicate!
+	 */
+	L1 = LL1;
+	L2 = LL2;
+
 }
 
 Heuristic::~Heuristic() {
 	// TODO Auto-generated destructor stub
 }
-void Heuristic::setBoard(Board b) {
-	board = b;
+void Heuristic::setBoard(Board& b) {
+	board = &b;
 }
-void Heuristic::setBag(Bag b) {
-	bag = b;
+void Heuristic::setBag(Bag& b) {
+	bag = &b;
 }
+
+void Heuristic::setPlayer(Player& p) {
+	player = &p;
+}
+
 bool Heuristic::filterPossibles(string s, int cur[]) {
 	int freq[26];
 	memset(freq, 0, sizeof(freq));
 	for (int j = 0; j < s.size(); ++j)
 		freq[s[j] - st]++;
 	for (int j = 0; j < 26; ++j)
-		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag.getTieScore(j))))
+		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag->getTieCount(j))))
 			return false;
 
 	return true;
@@ -40,9 +73,15 @@ bool Heuristic::filterPossibles(string s, int cur[]) {
 // btgeeb kol el strings eli mn 7 chars eli law et7tet fl board t3ml bingo
 vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 
-	dec.execute(board, str);
-	vector<Move> v = dec.getVector();
+	while (str.size() < 7)
+		str += 'e';
+
+	dec->execute(*board, str);
+	vector<Move> v = dec->getVector();
 	vector<pair<string, int> > ret;
+	//int freq[27];
+	//for (int i = 0; i < 27; ++i)
+	//freq[i] = cur[i];
 	for (int i = 0; i < v.size(); ++i) {
 		if (v[i].word.size())
 			continue;
@@ -50,7 +89,7 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
-		int score = J.applyMoveMin(v[i], board, bag);
+		int score = J->applyMoveMin(v[i], *board, *bag);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}
@@ -68,13 +107,13 @@ double Heuristic::calcProbability(int freq[], int score, int cur[]) {
 		// cur[i] hya el 7rof eli m3aya
 		freq[i] -= cur[i];
 		cnt += freq[i];
-		letterP *= J.pascal[bag.getTieCount(i)][freq[i]];
+		letterP *= J->pascal[bag->getTieCount(i)][freq[i]];
 	}
-	letterP /= (J.pascal[bag.bagLen()][cnt] * 1.0);
+	letterP /= (J->pascal[bag->bagLen()][cnt] * 1.0);
 // multiply by 2.5 if the score isn't calculated for the board
 	return letterP * (50 + score);
 }
-double Heuristic::expectedBingoMe(Move& move, Player &player) {
+double Heuristic::expectedBingoMe(Move& move) {
 	string word = move.word;
 	if (move.playedWord.size() == 7)
 		return 0.0;
@@ -85,14 +124,7 @@ double Heuristic::expectedBingoMe(Move& move, Player &player) {
 			cur[26]++;
 		else
 			cur[word[i] - st]++;
-	//string curStr = "";
-	//for (int i = 0; i < word.size(); ++i)
-	//cur[word[i] - st]--;
-	/*for (int i = 0; i < 26; ++i)
-	 for (int j = 0; j < cur[i]; ++j)
-	 curStr += char(i + st);
-	 if (cur[26])
-	 curStr += 'e';*/
+
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
 	//possible = filterPossibles(possible, cur);
 	double p = 0;
@@ -121,12 +153,20 @@ double Heuristic::QwithU(string m) {
 		return 0.0;
 }
 double Heuristic::expectedBingoOpponent() {
-	vector<pair<string, int>> possible; //= getPossibleBingo();
-	int mx = -1;
+	string s = opponent->getTieStr();
+	int cur[27];
+	memset(cur, 0, sizeof(cur));
+	for (int i = 0; i < s.size(); ++i)
+		if (s[i] == 'e')
+			cur[26]++;
+		else
+			cur[s[i] - 'A']++;
+	vector<pair<string, int>> possible = getPossibleBingo(s, cur);
+	int mx = 0;
 	for (int i = 0; i < possible.size(); ++i) {
-		mx = max(mx, possible[i].second);
+		mx += possible[i].second;
 	}
-	return -mx;
+	return -mx * 1.0 / ((int) possible.size() * 1.0);
 // eb3ty el mx
 //////////////// mfrod ab3t el exScore
 }
@@ -134,29 +174,6 @@ double Heuristic::expectedBingoOpponent() {
 double Heuristic::RackLeaveScore(string C) {
 
 	double score = 0.0;
-
-//The weights for the first occurence of a letter
-// * means blank
-	map<char, double> L1 { { 'a', 1.0 }, { 'b', -3.5 }, { 'c', -0.5 }, { 'd',
-			0.0 }, { 'e', 4.0 }, { 'f', -2.0 }, { 'g', -2.0 }, { 'h', 0.5 }, {
-			'i', -0.5 }, { 'j', -3.0 }, { 'k', -2.5 }, { 'l', -1.0 }, { 'm',
-			-1.0 }, { 'n', 0.5 }, { 'o', -1.5 }, { 'p', -1.5 }, { 'q', -11.5 },
-			{ 'r', 1.5 }, { 's', 7.5 }, { 't', 0.0 }, { 'u', -3.0 },
-			{ 'v', -5.5 }, { 'w', -4.0 }, { 'x', 3.5 }, { 'y', -2.0 }, { 'z',
-					2.0 }, { '*', 24.5 } // '*' means blank
-	};
-
-//Duplicate weights
-	map<char, double> L2 { { 'a', -3.0 }, { 'b', -3.0 }, { 'c', -3.5 }, { 'd',
-			-2.5 }, { 'e', -2.5 }, { 'f', -2.0 }, { 'g', -2.5 }, { 'h', -3.5 },
-			{ 'i', -4.0 }, { 'j', 0.0 }, { 'k', 0 }, { 'l', -2.0 },
-			{ 'm', -2.0 }, { 'n', -2.5 }, { 'o', -3.5 }, { 'p', -2.5 },
-			{ 'q', 0 }, { 'r', -3.5 }, { 's', -4.0 }, { 't', -2.5 },
-			{ 'u', -3.0 }, { 'v', -3.5 }, { 'w', -4.5 }, { 'x', 0 },
-			{ 'y', -4.5 }, { 'z', 0 }, { '*', 15.0 } };
-	/*j,k,q,x,z mknsh lehm rkm w 5lthm bzero,mmkn ab2a ashelhm mn lmap dh
-	 w a5od rkmhm mn fo2 k2nhm msh duplicate!
-	 */
 
 	char x;
 	map<char, double> m;  // The accumulative weight for each letter in the rack
@@ -194,15 +211,46 @@ double Heuristic::RackLeaveScore(string C) {
 
 	return score;
 }
-vector<Move> Heuristic::getAllMoves(Player& p) {
-	dec.execute(board, p.getTieStr());
-	vector<Move> v = dec.getVector();
+vector<Move> Heuristic::getAllMoves() {
+	dec->execute(*board, player->getTieStr());
+	vector<Move> v = dec->getVector();
 	return v;
 }
-char Heuristic::getChange(Player& p) {
-	for (int i = mostUsedLetters.size() - 1; i >= 0; --i)
-		if (p.getTie(mostUsedLetters[i] - st))
-			return mostUsedLetters[i];
+void Heuristic::getChange(char* ex) {
+	int size = bag->bagLen() - 7;
+	size = min(size, 4);
+	ex[0] = '\0';
+	if (size <= 0)
+		return ;
+	int exIdx = 0;
+	for (int i = 0; i < 26 && exIdx < size; ++i)
+		if (player->getTie(i) > 2)
+			ex[exIdx++] = char(i + 'A');
+	if (exIdx == size)
+		return ;
+	if (player->getTie('Q' - 'A') && !player->getTie('U' - 'A'))
+		ex[exIdx++] = 'Q';
+	if (exIdx++ == size)
+		return ;
+	string rack = player->getTieStr();
+	pair<double, int> weight[7];
+	sort(rack.begin(), rack.end());
+	for (int i = 0; i < rack.size(); ++i) {
+		if (rack[i] == 'e')
+			continue;
+		char c = tolower(rack[i]);
+		if (i > 0 && rack[i] == rack[i - 1])
+			weight[i].first = L2[c];
+		else
+			weight[i].first = L1[c];
+		weight[i].second = i;
+	}
+	sort(weight, weight + 7);
+	int idx = 0;
+	while (exIdx++ < size && idx < rack.size())
+		ex[exIdx++] = rack[weight[idx++].second];
+
+	return ;
 
 }
 //----------------------->will be modified later depending on what will bs sent
@@ -233,15 +281,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 	if (newWord[0] == 0) {
 		//search horizontally--left of the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board.getBoardValue(newWord[1], i) == 0) //no letter in this box
+			if (board->getBoardValue(newWord[1], i) == 0) //no letter in this box
 					{
-				if (board.getMultiplierLetter(newWord[1], i) == 2)
+				if (board->getMultiplierLetter(newWord[1], i) == 2)
 					perm += d_factor * 0.4;
-				else if (board.getMultiplierLetter(newWord[1], i) == 3)
+				else if (board->getMultiplierLetter(newWord[1], i) == 3)
 					perm += d_factor * 0.8;
-				else if (board.getMultiplierWord(newWord[1], i) == 2)
+				else if (board->getMultiplierWord(newWord[1], i) == 2)
 					perm += d_factor * 1.2;
-				else if (board.getMultiplierWord(newWord[1], i) == 3)
+				else if (board->getMultiplierWord(newWord[1], i) == 3)
 					perm += d_factor * 1.6;
 			} else
 				n -= 0.02;
@@ -251,15 +299,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board.getBoardValue(newWord[1], i) == 0) //no letter in this box
+			if (board->getBoardValue(newWord[1], i) == 0) //no letter in this box
 					{
-				if (board.getMultiplierLetter(newWord[1], i) == 2)
+				if (board->getMultiplierLetter(newWord[1], i) == 2)
 					perm += d_factor * 0.4;
-				else if (board.getMultiplierLetter(newWord[1], i) == 3)
+				else if (board->getMultiplierLetter(newWord[1], i) == 3)
 					perm += d_factor * 0.8;
-				else if (board.getMultiplierWord(newWord[1], i) == 2)
+				else if (board->getMultiplierWord(newWord[1], i) == 2)
 					perm += d_factor * 1.2;
-				else if (board.getMultiplierWord(newWord[1], i) == 3)
+				else if (board->getMultiplierWord(newWord[1], i) == 3)
 					perm += d_factor * 1.6;
 			} else
 				n -= 0.02;
@@ -269,15 +317,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board.getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(i, j) == 2)
+					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
-					else if (board.getMultiplierLetter(i, j) == 3)
+					else if (board->getMultiplierLetter(i, j) == 3)
 						perm += d_factor * 0.8;
-					else if (board.getMultiplierWord(i, j) == 2)
+					else if (board->getMultiplierWord(i, j) == 2)
 						perm += d_factor * 1.2;
-					else if (board.getMultiplierWord(i, j) == 3)
+					else if (board->getMultiplierWord(i, j) == 3)
 						perm += d_factor * 1.6;
 				} else
 					n -= 0.02;
@@ -288,15 +336,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board.getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(i, j) == 2)
+					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
-					else if (board.getMultiplierLetter(i, j) == 3)
+					else if (board->getMultiplierLetter(i, j) == 3)
 						perm += d_factor * 0.8;
-					else if (board.getMultiplierWord(i, j) == 2)
+					else if (board->getMultiplierWord(i, j) == 2)
 						perm += d_factor * 1.2;
-					else if (board.getMultiplierWord(i, j) == 3)
+					else if (board->getMultiplierWord(i, j) == 3)
 						perm += d_factor * 1.6;
 				} else
 					n -= 0.02;
@@ -308,15 +356,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 	else {
 		//above the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(i, newWord[1]) == 2)
+				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
-				else if (board.getMultiplierLetter(i, newWord[1]) == 3)
+				else if (board->getMultiplierLetter(i, newWord[1]) == 3)
 					perm += d_factor * 0.8;
-				else if (board.getMultiplierWord(i, newWord[1]) == 2)
+				else if (board->getMultiplierWord(i, newWord[1]) == 2)
 					perm += d_factor * 1.2;
-				else if (board.getMultiplierWord(i, newWord[1]) == 3)
+				else if (board->getMultiplierWord(i, newWord[1]) == 3)
 					perm += d_factor * 1.6;
 			} else
 				n -= 0.02;
@@ -326,15 +374,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board.getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
 					{
-				if (board.getMultiplierLetter(i, newWord[1]) == 2)
+				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
-				else if (board.getMultiplierLetter(i, newWord[1]) == 3)
+				else if (board->getMultiplierLetter(i, newWord[1]) == 3)
 					perm += d_factor * 0.8;
-				else if (board.getMultiplierWord(i, newWord[1]) == 2)
+				else if (board->getMultiplierWord(i, newWord[1]) == 2)
 					perm += d_factor * 1.2;
-				else if (board.getMultiplierWord(i, newWord[1]) == 3)
+				else if (board->getMultiplierWord(i, newWord[1]) == 3)
 					perm += d_factor * 1.6;
 			} else
 				n -= 0.02;
@@ -345,15 +393,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board.getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(j, i) == 2)
+					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
-					else if (board.getMultiplierLetter(j, i) == 3)
+					else if (board->getMultiplierLetter(j, i) == 3)
 						perm += d_factor * 0.8;
-					else if (board.getMultiplierWord(j, i) == 2)
+					else if (board->getMultiplierWord(j, i) == 2)
 						perm += d_factor * 1.2;
-					else if (board.getMultiplierWord(j, i) == 3)
+					else if (board->getMultiplierWord(j, i) == 3)
 						perm += d_factor * 1.6;
 				} else
 					n -= 0.02;
@@ -364,15 +412,15 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board.getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0)	//no letter in this box
 						{
-					if (board.getMultiplierLetter(j, i) == 2)
+					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
-					else if (board.getMultiplierLetter(j, i) == 3)
+					else if (board->getMultiplierLetter(j, i) == 3)
 						perm += d_factor * 0.8;
-					else if (board.getMultiplierWord(j, i) == 2)
+					else if (board->getMultiplierWord(j, i) == 2)
 						perm += d_factor * 1.2;
-					else if (board.getMultiplierWord(j, i) == 3)
+					else if (board->getMultiplierWord(j, i) == 3)
 						perm += d_factor * 1.6;
 				} else
 					n -= 0.02;
@@ -384,13 +432,46 @@ double Heuristic::DefensiveStrategy(Move move) {
 	return -n * perm;
 }
 
-double Heuristic::getHeu(Move& m, Player& player) {
+double Heuristic::getHeu(Move& m) {
 	// lma omnia trod 3alia hashof expented bingo opponenet
 
 	double ds = 0;
+	J->applyMove(m, *board, *player, *bag);
 	if (state == 0)
 		ds = DefensiveStrategy(m);
-	double num = 0.8 * expectedBingoMe(m, player) + ds + RackLeaveScore(m.word)
+	double num = 0.8 * expectedBingoMe(m) + ds + RackLeaveScore(m.word)
 			+ 0.5 * QwithU(m.playedWord);
 	return num;
+}
+
+void Heuristic::qSticking(vector<Move>& vec) {
+	if (bag->bagLen() > 7)
+		return;
+	if (!bag->getTieCount('Q' - 'A'))
+		return;
+	string rack = "";
+	for (int i = 0; i < 26; ++i)
+		for (int j = 0; j < (bag->getTieCount(i)); ++j)
+			rack += char(i + 'A');
+	if (bag->getTieCount(26))
+		rack += 'e';
+	vector<Move> ret;
+
+	for (int i = 0; i < vec.size(); ++i) {
+		Board newB = *board;
+		Player b = *player;
+		J->applyMove(vec[i], newB, b, *bag);
+		dec->execute(newB, rack);
+		vector<Move> tmp = dec->getVector();
+		bool fnd = false;
+		for (int j = 0; j < tmp.size() && !fnd; ++j) {
+			for (int k = 0; k < tmp[j].playedWord.size(); ++k)
+				if (tmp[j].playedWord[k] == 'Q') {
+					fnd = true;
+					break;
+				}
+		}
+		if (!fnd)
+			ret.push_back(vec[i]);
+	}
 }

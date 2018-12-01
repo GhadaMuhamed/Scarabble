@@ -9,33 +9,41 @@
 #include "../Dictionary/dictionary.h"
 #include "../Bag/Bag.h"
 #include "../Judge/Judge.h"
+#include "../Player/Player.h"
 
 using namespace std;
 #ifndef HEURISTIC_H_
 #define HEURISTIC_H_
 
 class Heuristic {
-	Board board;
-	dictionary dec;
-	Bag bag;
-	Judge J;
+	Board* board;
+	dictionary* dec;
+	Bag* bag;
+	Player* player;
+	Player* opponent;
+
+	Judge* J;
 	const char st = 'A';
 	const string mostUsedLetters = "etaoinshrdlcumwfgypbvkjxqz";
 	int state;
+	map<char,double>L1,L2;
 public:
-	Heuristic(Board, dictionary, Bag, Judge);
+	Heuristic(Board&, dictionary&, Bag&, Judge&,Player&,Player&);
 	vector<pair<string, int>> getPossibleBingo(string str, int cut[]);
 	bool filterPossibles(string s, int cur[]);
 	double calcProbability(int freq[], int score, int cur[]);
-	double expectedBingoMe(Move& move, Player &player);
+	double expectedBingoMe(Move& move);
 	double expectedBingoOpponent();
 	double RackLeaveScore(string C);
-	char getChange(Player& p);
-	void setBoard(Board b);
-	void setBag(Bag b);
+	void getChange(char*);
+	void setBoard(Board& b);
+	void setBag(Bag& b);
+	void setPlayer(Player& p);
+	void qSticking(vector<Move>& vec);
+
 	double QwithU(string m);
-	double getHeu(Move& m, Player& plaler);
-	vector<Move> getAllMoves(Player& p);
+	double getHeu(Move& m);
+	vector<Move> getAllMoves();
 	double DefensiveStrategy(Move move);
 
 	virtual ~Heuristic();

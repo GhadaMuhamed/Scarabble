@@ -4,6 +4,11 @@
 
 #include "Judge.h"
 #include "../Bag/Bag.h"
+Judge::Judge(int rem1, int rem2) {
+	remTimePlayer=rem1;
+	remTimeGame=rem2;
+
+}
 
 int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 	int score = 0, x = move.x, y = move.y;
@@ -24,7 +29,7 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
 			wordMultiplier *= board.getMultiplierWord(x, y);
 			y++, cnt++;
 		}
-	} else if (move.direction == UP) {
+	} else if (move.direction == DOWN) {
 		// up
 		int cnt = 0;
 		while (cnt < word.size()) {
@@ -57,7 +62,7 @@ int Judge::applyMoveMin(const Move &move, Board &board, Bag &bag) {
 			wordMultiplier *= board.getMultiplierWord(x, y);
 			y++, cnt++;
 		}
-	} else if (move.direction == UP) {
+	} else if (move.direction == DOWN) {
 		// up
 		int cnt = 0;
 		while (cnt < word.size()) {

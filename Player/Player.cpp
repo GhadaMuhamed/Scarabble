@@ -6,9 +6,17 @@
 
 Player::Player(int playerId) :
 		playerId(playerId) {
+	if (playerId == 0)
+		memset(myTies, 0, sizeof myTies);
+	else
+		for (int i = 0; i < 27; ++i)
+			myTies[i] = 100;
+
+}
+Player::Player() {
+	playerId = 0;
 	memset(myTies, 0, sizeof myTies);
 }
-
 bool Player::addTie(int tie) {
 	if (totalTies >= PLAYER_TIES_SIZE || tie < 0 || tie > 26)
 		return false;
