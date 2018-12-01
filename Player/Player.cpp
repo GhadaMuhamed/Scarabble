@@ -1,9 +1,9 @@
 //
 // Created by riham on 24/10/18.
 //
-
+#include<bits/stdc++.h>
+using namespace std;
 #include "Player.h"
-
 Player::Player(int playerId) :
 		playerId(playerId) {
 	if (playerId == 0)
@@ -17,6 +17,18 @@ Player::Player() {
 	playerId = 0;
 	memset(myTies, 0, sizeof myTies);
 }
+
+void Player::addValue(int v, int tie) {
+
+	myTies[tie] = v;
+}
+int Player::getValue(int tie) {
+
+	return myTies[tie];
+}
+int Player::getPlayerID() {
+	return playerId;
+}
 bool Player::addTie(int tie) {
 	if (totalTies >= PLAYER_TIES_SIZE || tie < 0 || tie > 26)
 		return false;
@@ -27,7 +39,7 @@ bool Player::addTie(int tie) {
 
 bool Player::playTie(int tie) {
 	if (tie < 0 || tie > 26 || myTies[tie] <= 0)
-		return false; // the player doesn't have any ties yet
+		return false; // the player doesn't have any ties
 	myTies[tie]--;
 	totalTies--;
 	return true;

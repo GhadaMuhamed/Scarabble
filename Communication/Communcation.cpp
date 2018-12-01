@@ -8,6 +8,7 @@
 #include "Communcation.h"
 #include "../source.cpp"
 Communcation::Communcation() {
+<<<<<<< HEAD
 	board = player1 = player2 = judge = bag = dic = heu = NULL;
 }
 void Communcation::start(commToImp c) {
@@ -66,6 +67,16 @@ void Communcation::start(commToImp c) {
 						bag->removeTie(c.move.tiles[i]);
 					else
 						bag->removeTie(27);
+=======
+	// TODO Auto-generated constructor stub
+	board = nullptr;
+
+}
+void Communcation::start(commToImp c) {
+	// start or disconnect
+	if (c.Msgtype == 1 || c.Msgtype == 12) {
+//		board = new Board(c.Board_from_server);
+>>>>>>> ee30d543dd5da180e0d541927cfbd2d2f03d35dd
 
 			} else
 				obj.Msgtype = 6;
@@ -181,7 +192,7 @@ Move_to_from_server Communcation::castToServerMove(Move & move) {
 	return serverMove;
 }
 Communcation::~Communcation() {
-	if (board != NULL)
+	if (board != nullptr)
 		delete board;
 	if (player1 != NULL)
 		delete player1;

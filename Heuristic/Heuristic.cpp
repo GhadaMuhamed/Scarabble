@@ -4,8 +4,8 @@
  *  Created on: Nov 25, 2018
  *      Author: ghada
  */
-#include "Heuristic.h"
 #include<bits/stdc++.h>
+#include "Heuristic.h"
 using namespace std;
 Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 		Player& p2) {
@@ -61,7 +61,7 @@ void Heuristic::setPlayer(Player& p) {
 bool Heuristic::filterPossibles(string s, int cur[]) {
 	int freq[26];
 	memset(freq, 0, sizeof(freq));
-	for (int j = 0; j < s.size(); ++j)
+	for (int j = 0; j < (int)s.size(); ++j)
 		freq[s[j] - st]++;
 	for (int j = 0; j < 26; ++j)
 		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag->getTieCount(j))))
@@ -82,14 +82,14 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 	//int freq[27];
 	//for (int i = 0; i < 27; ++i)
 	//freq[i] = cur[i];
-	for (int i = 0; i < v.size(); ++i) {
+	for (int i = 0; i < (int)v.size(); ++i) {
 		if (v[i].word.size())
 			continue;
 		if (!filterPossibles(v[i].playedWord, cur))
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
-		int score = J->applyMoveMin(v[i], *board, *bag);
+		int score = J->applyMoveNoChange(v[i], *board, *bag);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}
@@ -119,7 +119,7 @@ double Heuristic::expectedBingoMe(Move& move) {
 		return 0.0;
 	int freq[27], cur[27];
 	memset(cur, 0, sizeof(cur));
-	for (int i = 0; i < word.size(); ++i)
+	for (int i = 0; i < (int)word.size(); ++i)
 		if (word[i] == 'e')
 			cur[26]++;
 		else
@@ -128,9 +128,9 @@ double Heuristic::expectedBingoMe(Move& move) {
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
 	//possible = filterPossibles(possible, cur);
 	double p = 0;
-	for (int i = 0; i < possible.size(); ++i) {
+	for (int i = 0; i < (int)possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
-		for (int j = 0; j < possible[i].first.size(); ++j)
+		for (int j = 0; j < (int)possible[i].first.size(); ++j)
 			freq[possible[i].first[j] - st]++;
 
 		// calculate the expected number of the score to make this word
@@ -142,7 +142,7 @@ double Heuristic::QwithU(string m) {
 	int cntQ = 0;
 	int cntU = 0;
 
-	for (int i = 0; i < m.size(); ++i)
+	for (int i = 0; i < (int)m.size(); ++i)
 		if (m[i] == 'Q')
 			cntQ++;
 		else if (m[i] == 'U')
@@ -156,14 +156,14 @@ double Heuristic::expectedBingoOpponent() {
 	string s = opponent->getTieStr();
 	int cur[27];
 	memset(cur, 0, sizeof(cur));
-	for (int i = 0; i < s.size(); ++i)
+	for (int i = 0; i < (int)s.size(); ++i)
 		if (s[i] == 'e')
 			cur[26]++;
 		else
 			cur[s[i] - 'A']++;
 	vector<pair<string, int>> possible = getPossibleBingo(s, cur);
 	int mx = 0;
-	for (int i = 0; i < possible.size(); ++i) {
+	for (int i = 0; i < (int)possible.size(); ++i) {
 		mx += possible[i].second;
 	}
 	return -mx * 1.0 / ((int) possible.size() * 1.0);

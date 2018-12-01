@@ -11,7 +11,7 @@
 #include "../Move/Move.h"
 
 #define RIGHT   0
-#define DOWN    1
+#define DOWN      1
 
 class Judge {
 	int remTimePlayer;
@@ -21,8 +21,8 @@ public:
 	Judge(int, int);
 	long long pascal[101][101];
 	int applyMove(const Move &move, Board &board, Player &player, Bag &bag);
-	int applyMoveMin(const Move &move, Board &board, Bag &bag);
-	bool isClosed(Board &board);
+    int applyMoveNoChange(const Move &move, Board &board, Bag &bag);
+    bool isClosed(Board &board);
 	void nCr();
 };
 
