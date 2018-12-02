@@ -45,6 +45,7 @@ public:
 	double getHeu(Move& m);
 	vector<Move> getAllMoves();
 	double DefensiveStrategy(Move move);
+	void Slowendgame(vector<Move>& possibleMoves, string oPPrack);
 
 	virtual ~Heuristic();
 };
