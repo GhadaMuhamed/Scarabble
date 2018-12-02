@@ -476,3 +476,64 @@ void Heuristic::qSticking(vector<Move>& vec) {
 			ret.push_back(vec[i]);
 	}
 }
+
+void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
+
+	int mcount = possibleMoves.size();
+	string word1, word2;
+	int wlen, wlen2;
+	bool x;
+	int score;
+	std::size_t found;
+	// a map of the characters with the opponent to easily check which chars he has
+	map<char, int> or ;
+	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
+
+	for (int i = 0; i < mcount - 1; ++i) {
+		wlen = possibleMoves[i].word.length();
+		score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
+		possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
+		for (int j = i + 1; j < mcount; ++j)
+		{
+			//which word is longer
+			wlen2 = possibleMoves[j].word.length();
+			if (wlen > wlen2) {
+				word1 = possibleMoves[i].word;
+				word2 = possibleMoves[j].word;
+				x = true; // the ith word is the greater  
+			}
+			else if (wlen2 > wlen) {
+				word2 = possibleMoves[i].word;
+				word1 = possibleMoves[j].word;
+				x = false; //jth word is the greater
+			}
+
+
+			found = word1.find(word2);  // check it word2 is subset of word1
+			if (found == 0)
+			{
+				//check if the other chars are with the opponent too
+				for (int ww = found + word2.length(); ww < word1.length(); ++ww)
+					// check if the letters are with the opponent
+					if (or .count(word1[ww])) {
+
+						if (x) {
+							possibleMoves.erase(possibleMoves.begin() + j);
+							possibleMoves[i].heuristicValue += 10;
+						}
+						else { //remove the ith word and break from the j loop 
+							possibleMoves.erase(possibleMoves.begin() + i);
+							possibleMoves[j].heuristicValue += 10;
+							j = mcount;  // to break the jth loop
+						}
+					}
+
+				break;
+			}
+
+		}
+	}
+
+	std::sort(possibleMoves.begin(), possibleMoves.end());
+
+}
