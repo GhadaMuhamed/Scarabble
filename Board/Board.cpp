@@ -52,10 +52,10 @@ void Board::initBoard() {
 
 }
 
-Board::Board(){
+Board::Board() {
 
 }
-Board::Board(int b[][BOARD_SIZE]) {
+Board::Board(uint8_t b[][BOARD_SIZE]) {
 	for (int i = 0; i < BOARD_SIZE; ++i)
 		for (int j = 0; j < BOARD_SIZE; ++j) {
 			board[i][j] = b[i][j];
@@ -74,6 +74,11 @@ ostream& operator<<(ostream& os, Board const& myObj) {
 int Board::getBoardValue(int posX, int posY) {
 	// if this position on the board isn't occupied the it's -1 otherwise it's already occupied.
 	return board[posX][posY];
+}
+void Board::getBoard(uint8_t b[][BOARD_SIZE]) {
+	for (int i = 0; i < BOARD_SIZE; ++i)
+		for (int j = 0; j < BOARD_SIZE; ++j)
+			b[i][j] = board[i][j];
 }
 
 bool Board::putFirstTie(int tie) {

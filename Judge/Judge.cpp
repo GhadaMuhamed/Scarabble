@@ -4,9 +4,8 @@
 
 #include "Judge.h"
 #include "../Bag/Bag.h"
-Judge::Judge(int rem1, int rem2) {
-	remTimePlayer=rem1;
-	remTimeGame=rem2;
+Judge::Judge() {
+
 
 }
 

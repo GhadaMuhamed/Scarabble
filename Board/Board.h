@@ -39,7 +39,7 @@ class Board {
 			{ 4, 15 }, { 12, 15 } };
 public:
 	Board();
-	Board(int b[][BOARD_SIZE]);
+	Board(uint8_t b[][BOARD_SIZE]);
 	void initBoard();
 	friend ostream& operator<<(ostream& os, Board const& myObj);
 	bool putFirstTie(int tie);
@@ -56,6 +56,7 @@ public:
 	int getMultiplierLetter(int posX, int posY);
 	int getMultiplierWord(int posX, int posY);
 	int tiesCount();
+	void getBoard(uint8_t b[][BOARD_SIZE]);
 	Board& operator=(Board const& myObj);
 };
 

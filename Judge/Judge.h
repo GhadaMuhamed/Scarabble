@@ -14,11 +14,9 @@
 #define DOWN      1
 
 class Judge {
-	int remTimePlayer;
-	int remTimeGame;
 
 public:
-	Judge(int, int);
+	Judge();
 	long long pascal[101][101];
 	int applyMove(const Move &move, Board &board, Player &player, Bag &bag);
     int applyMoveNoChange(const Move &move, Board &board, Bag &bag);

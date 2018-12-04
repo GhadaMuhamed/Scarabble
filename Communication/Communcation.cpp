@@ -7,12 +7,22 @@
 
 #include "Communcation.h"
 #include "../source.cpp"
+
 Communcation::Communcation() {
-<<<<<<< HEAD
-	board = player1 = player2 = judge = bag = dic = heu = NULL;
+	board = NULL;
+	player1 = NULL;
+	player2 = NULL;
+	judge = NULL;
+	bag = NULL;
+	dic = NULL;
+	heu = NULL;
 }
-void Communcation::start(commToImp c) {
+impToInt Communcation::start(intToImp c) {
 	// start or disconnect
+	impToInt ret;
+	ret.Msgtype = -1;
+	ret.boardUpdated = false;
+	ret.rackUpdated = false;
 	if (c.Msgtype == 1) {
 		bag = new Bag();
 		board = new Board(c.Board_from_server);
@@ -20,31 +30,39 @@ void Communcation::start(commToImp c) {
 		player2 = new Player(1);
 		player2->addScore(c.opponent_score);
 		player1->addScore(c.Player_score);
-		judge = new Judge(c.our_remaining_time, c.total_remaining_time);
+		judge = new Judge();
 		dic = new dictionary("sowpods.txt");
-		heu = new Heuristic(*board, *dic, *bag, *judge, *player1);
-		for (int i = 0; i < 7; ++i) {
-			if (c.move.tiles[i] == -1)
-				break;
-			if (c.move.tiles[i] != 99)
-				player1->addTie(c.move.tiles[i]), bag->removeTie(
-						c.move.tiles[i]);
-			else
-				player1->addTie(26), bag->removeTie(26);
-		}
+		heu = new Heuristic(*board, *dic, *bag, *judge, *player1, *player2);
+		addPlayerTies(c.move.tiles);
 		for (int i = 0; i < BOARD_SIZE; ++i)
 			for (int j = 0; j < BOARD_SIZE; ++j)
 				if (c.Board_from_server[i][j] >= 0
 						&& c.Board_from_server[i][j] < 26)
 					bag->removeTie(c.Board_from_server[i][j]);
+
+		board->getBoard(ret.Board);
+		ret.boardUpdated = true;
+		ret.rackUpdated = true;
+	} else if (c.Msgtype == 10) {
+//learning mode !!!!!!!!!!!!!!!!!!
 	}
 	if (c.order == 1) {
+		if (c.Msgtype == 11) {
+			//law omnia 3wza t5zn el tiles
+		}
+		if (c.Msgtype == 8) {
+			judge->applyMove(myLast, *board, *player1, *bag);
+			ret.boardUpdated = true;
+			board->getBoard(ret.Board);
+			addPlayerTies(c.move.tiles);
+			ret.rackUpdated = true;
+		}
+
 		if (c.Msgtype != 4) {
 			dic->execute(*board, player1->getTieStr());
 			Move best = nextPlay(*heu, dic->getVector(), *board, *bag, *player1,
 					*judge);
-			commToImp ret;
-
+			myLast = best;
 			if (best.switchMove)
 				ret.Msgtype = 2;
 			else if (best.tiles.size())
@@ -52,58 +70,53 @@ void Communcation::start(commToImp c) {
 			else
 				ret.Msgtype = 4;
 			ret.move = castToServerMove(best);
-			// return ret
+			return ret;
 
 		} else {
-			commToImp obj;
+			hisLast = castToMove(c.move);
 			if (checkStrings(c.move)) {
-				obj.Msgtype = 5;
-				Move mv = castToMove(c.move);
-				judge->applyMove(mv, *board, *player2, *bag);
-				for (int i = 0; i < 7; ++i)
-					if (c.move.tiles[i] == -1)
-						break;
-					else if (c.move.tiles[i] < 26)
-						bag->removeTie(c.move.tiles[i]);
-					else
-						bag->removeTie(27);
-=======
-	// TODO Auto-generated constructor stub
-	board = nullptr;
-
-}
-void Communcation::start(commToImp c) {
-	// start or disconnect
-	if (c.Msgtype == 1 || c.Msgtype == 12) {
-//		board = new Board(c.Board_from_server);
->>>>>>> ee30d543dd5da180e0d541927cfbd2d2f03d35dd
+				ret.Msgtype = 5;
+				//applyOpponentMove(mv, c.move.tiles);
 
 			} else
-				obj.Msgtype = 6;
-
-		}
-		if (c.Msgtype == 8) {
-			//call ui
+				ret.Msgtype = 6;
+			return ret;
 		}
 	} else if (c.order == 2) {
 		if (c.Msgtype == 3 || c.Msgtype == 5) {
-			for (int i = 0; i < 7; ++i) {
-				if (c.move.tiles[i] == -1)
-					break;
-				if (c.move.tiles[i] == 90)
-					player1->addTie(26), bag->removeTie(26);
-				else
-					player1->addTie(c.move.tiles[i]), bag->removeTie(
-							c.move.tiles[i]);
-			}
+			addPlayerTies(c.move.tiles);
+			ret.rackUpdated = true;
 		}
 		if (c.Msgtype == 5) {
 			// call ui
+			judge->applyMove(myLast, *board, *player1, *bag);
+			ret.boardUpdated = true;
+			board->getBoard(ret.Board);
 		}
 	}
+	return ret;
 
 }
-
+void Communcation::applyOpponentMove(Move& mv, uint8_t tiles[]) {
+	judge->applyMove(hisLast, *board, *player2, *bag);
+	for (int i = 0; i < 7; ++i)
+		if (tiles[i] == -1)
+			break;
+		else if (tiles[i] < 26)
+			bag->removeTie(tiles[i]);
+		else
+			bag->removeTie(27);
+}
+void Communcation::addPlayerTies(uint8_t tiles[]) {
+	for (int i = 0; i < 7; ++i) {
+		if (tiles[i] == -1)
+			break;
+		if (tiles[i] == 90)
+			player1->addTie(26), bag->removeTie(26);
+		else
+			player1->addTie(tiles[i]), bag->removeTie(tiles[i]);
+	}
+}
 bool Communcation::checkStrings(Move_to_from_server mv) {
 	int stR = mv.row;
 	int stC = mv.column;
@@ -114,8 +127,11 @@ bool Communcation::checkStrings(Move_to_from_server mv) {
 	for (int i = 0; i < 7; ++i)
 		if (mv.tiles[i] == -1)
 			break;
-		else
+		else {
+			if (mv.tiles[i] > 99)
+				mv.tiles[i] -= 100;
 			len++, played += char(mv.tiles[i] + 'A');
+		}
 
 //ofoky
 	if (!direc) {
@@ -159,8 +175,12 @@ Move Communcation::castToMove(Move_to_from_server & serverMove) {
 	for (int i = 0; i < 7; ++i)
 		if (serverMove.tiles[i] == -1)
 			break;
-		else
-			s += char(serverMove.tiles[i] + 'A');
+		else {
+			if (serverMove.tiles[i] > 99)
+				s += char(serverMove.tiles[i] - 100 + 'a');
+			else
+				s += char(serverMove.tiles[i] + 'A');
+		}
 	move.playedWord = s;
 	move.x = serverMove.row;
 	move.y = serverMove.column;
@@ -173,19 +193,15 @@ Move_to_from_server Communcation::castToServerMove(Move & move) {
 	serverMove.Directon = move.direction;
 	serverMove.column = move.y;
 	serverMove.row = move.x;
-	int arr[27];
-	for (int i = 0; i < 27; ++i)
-		arr[i] = player1->getTie(i);
 	for (int i = 0; i < 7; ++i)
 		if (move.tiles.size() < i)
 			serverMove.tiles[i] = (
 					move.tiles[i] < 26 ? int(move.tiles[i] - 'A') : 99);
 		else if (!move.tiles.size() && move.playedWord.size() < i) {
-			if (arr[move.playedWord[i] - 'A']) {
+			if (move.playedWord[i] >= 'A' && move.playedWord[i] <= 'Z')
 				serverMove.tiles[i] = int(move.playedWord[i] - 'A');
-				arr[move.playedWord[i] - 'A']--;
-			} else
-				serverMove.tiles[i] = int(move.playedWord[i] - 'A') + 100;
+			else
+				serverMove.tiles[i] = int(move.playedWord[i] - 'a') + 100;
 
 		} else
 			serverMove.tiles[i] = -1;

@@ -36,7 +36,7 @@ int main() {
 	board.applyMove(7, 8, 'Y'-'A');
 	cout << board;
 	cout << "----------------------------------------------\n";
-    Judge judge = Judge(200,200);
+    Judge judge;
     vector<Move> moves;
     Move move;
     move.playedWord = "RIHAM";

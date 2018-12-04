@@ -5,11 +5,8 @@
  *      Author: ghada
  */
 #include<bits/stdc++.h>
-#include "../Board/Board.h"
 #include "../Dictionary/dictionary.h"
-#include "../Bag/Bag.h"
 #include "../Judge/Judge.h"
-#include "../Player/Player.h"
 
 using namespace std;
 #ifndef HEURISTIC_H_
@@ -26,9 +23,11 @@ class Heuristic {
 	const char st = 'A';
 	const string mostUsedLetters = "etaoinshrdlcumwfgypbvkjxqz";
 	int state;
-	map<char,double>L1,L2;
+	map<char, double> L1, L2;
+	double w[4];
+	double startW[4];
 public:
-	Heuristic(Board&, dictionary&, Bag&, Judge&,Player&,Player&);
+	Heuristic(Board&, dictionary&, Bag&, Judge&, Player&, Player&);
 	vector<pair<string, int>> getPossibleBingo(string str, int cut[]);
 	bool filterPossibles(string s, int cur[]);
 	double calcProbability(int freq[], int score, int cur[]);
@@ -39,7 +38,7 @@ public:
 	void setBoard(Board& b);
 	void setBag(Bag& b);
 	void setPlayer(Player& p);
-	void qSticking(vector<Move>& vec);
+	double qSticking(Move&);
 
 	double QwithU(string m);
 	double getHeu(Move& m);

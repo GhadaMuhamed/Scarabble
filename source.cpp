@@ -6,15 +6,15 @@
 #include<algorithm>
 #include <sstream>
 #include <time.h>
-#include "Judge/Judge.h"
-#include "Bag/Bag.h"
-#include "Dictionary/dictionary.h"
 #include "Heuristic/Heuristic.h"
+#include "Dictionary/dictionary.h"
+#include "Judge/Judge.h"
+
 using namespace std;
 
 # define depth 10
 # define S 10
-Judge J(200, 200);
+Judge J;
 dictionary dec;
 //Heuristic heu;
 Move huristicMoves(Heuristic& heu, Board& board, Player& ana, Player& opponent,

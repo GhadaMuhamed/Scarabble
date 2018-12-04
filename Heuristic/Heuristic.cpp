@@ -41,6 +41,11 @@ Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 	 */
 	L1 = LL1;
 	L2 = LL2;
+	startW[0] = w[0] = 0.3;
+	startW[1] = w[1] = 0.7;
+	startW[2] = w[2] = 0.2;
+	startW[3] = w[3] = 0.1;
+	startW[4] = w[4] = 0.4;
 
 }
 
@@ -59,11 +64,14 @@ void Heuristic::setPlayer(Player& p) {
 }
 
 bool Heuristic::filterPossibles(string s, int cur[]) {
-	int freq[26];
+	int freq[27];
 	memset(freq, 0, sizeof(freq));
-	for (int j = 0; j < (int)s.size(); ++j)
-		freq[s[j] - st]++;
-	for (int j = 0; j < 26; ++j)
+	for (int j = 0; j < (int) s.size(); ++j)
+		if (s[j] >= 'A' && s[j] <= 'Z')
+			freq[s[j] - st]++;
+		else
+			freq[26]++;
+	for (int j = 0; j < 27; ++j)
 		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag->getTieCount(j))))
 			return false;
 
@@ -73,17 +81,12 @@ bool Heuristic::filterPossibles(string s, int cur[]) {
 ///implement for omnia
 // btgeeb kol el strings eli mn 7 chars eli law et7tet fl board t3ml bingo
 vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
-
 	while (str.size() < 7)
 		str += 'e';
-
-	dec->execute(*board, str);
+	dec->execute(*board, str, 100);
 	vector<Move> v = dec->getVector();
 	vector<pair<string, int> > ret;
-	//int freq[27];
-	//for (int i = 0; i < 27; ++i)
-	//freq[i] = cur[i];
-	for (int i = 0; i < (int)v.size(); ++i) {
+	for (int i = 0; i < (int) v.size(); ++i) {
 		if (v[i].word.size())
 			continue;
 		if (!filterPossibles(v[i].playedWord, cur))
@@ -102,7 +105,7 @@ double Heuristic::calcProbability(int freq[], int score, int cur[]) {
 
 	double letterP = 1;
 	int cnt = 0;
-	for (int i = 0; i < 26; ++i) {
+	for (int i = 0; i < 27; ++i) {
 		if (cur[i] >= freq[i])
 			continue;
 		// cur[i] hya el 7rof eli m3aya
@@ -120,7 +123,7 @@ double Heuristic::expectedBingoMe(Move& move) {
 		return 0.0;
 	int freq[27], cur[27];
 	memset(cur, 0, sizeof(cur));
-	for (int i = 0; i < (int)word.size(); ++i)
+	for (int i = 0; i < (int) word.size(); ++i)
 		if (word[i] == 'e')
 			cur[26]++;
 		else
@@ -129,10 +132,13 @@ double Heuristic::expectedBingoMe(Move& move) {
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
 	//possible = filterPossibles(possible, cur);
 	double p = 0;
-	for (int i = 0; i < (int)possible.size(); ++i) {
+	for (int i = 0; i < (int) possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
-		for (int j = 0; j < (int)possible[i].first.size(); ++j)
-			freq[possible[i].first[j] - st]++;
+		for (int j = 0; j < (int) possible[i].first.size(); ++j)
+			if (possible[i].first[j] >= 'A' && possible[i].first[j] <= 'Z')
+				freq[possible[i].first[j] - st]++;
+			else
+				freq[26]++;
 
 		// calculate the expected number of the score to make this word
 		p += calcProbability(freq, possible[i].second, cur);
@@ -143,7 +149,7 @@ double Heuristic::QwithU(string m) {
 	int cntQ = 0;
 	int cntU = 0;
 
-	for (int i = 0; i < (int)m.size(); ++i)
+	for (int i = 0; i < (int) m.size(); ++i)
 		if (m[i] == 'Q')
 			cntQ++;
 		else if (m[i] == 'U')
@@ -157,14 +163,14 @@ double Heuristic::expectedBingoOpponent() {
 	string s = opponent->getTieStr();
 	int cur[27];
 	memset(cur, 0, sizeof(cur));
-	for (int i = 0; i < (int)s.size(); ++i)
+	for (int i = 0; i < (int) s.size(); ++i)
 		if (s[i] == 'e')
 			cur[26]++;
 		else
 			cur[s[i] - 'A']++;
 	vector<pair<string, int>> possible = getPossibleBingo(s, cur);
 	int mx = 0;
-	for (int i = 0; i < (int)possible.size(); ++i) {
+	for (int i = 0; i < (int) possible.size(); ++i) {
 		mx += possible[i].second;
 	}
 	return -mx * 1.0 / ((int) possible.size() * 1.0);
@@ -180,7 +186,7 @@ double Heuristic::RackLeaveScore(string C) {
 	map<char, double> m;  // The accumulative weight for each letter in the rack
 	int v = 0, c = 0; //the number of vowels and constants
 
-	for (int i = 0; i < C.length(); i++) {
+	for (int i = 0; i < (int) C.length(); i++) {
 		x = C[i];
 		if (x == 'a' || x == 'e' || x == 'i' || x == 'o' || x == 'u')
 			v++;
@@ -222,21 +228,21 @@ void Heuristic::getChange(char* ex) {
 	size = min(size, 4);
 	ex[0] = '\0';
 	if (size <= 0)
-		return ;
+		return;
 	int exIdx = 0;
 	for (int i = 0; i < 26 && exIdx < size; ++i)
 		if (player->getTie(i) > 2)
 			ex[exIdx++] = char(i + 'A');
 	if (exIdx == size)
-		return ;
+		return;
 	if (player->getTie('Q' - 'A') && !player->getTie('U' - 'A'))
 		ex[exIdx++] = 'Q';
 	if (exIdx++ == size)
-		return ;
+		return;
 	string rack = player->getTieStr();
 	pair<double, int> weight[7];
 	sort(rack.begin(), rack.end());
-	for (int i = 0; i < rack.size(); ++i) {
+	for (int i = 0; i < (int) rack.size(); ++i) {
 		if (rack[i] == 'e')
 			continue;
 		char c = tolower(rack[i]);
@@ -248,12 +254,65 @@ void Heuristic::getChange(char* ex) {
 	}
 	sort(weight, weight + 7);
 	int idx = 0;
-	while (exIdx++ < size && idx < rack.size())
+	while (exIdx++ < size && idx < (int) rack.size())
 		ex[exIdx++] = rack[weight[idx++].second];
 
-	return ;
+	return;
 
 }
+
+double Heuristic::getHeu(Move& m) {
+	// lma omnia trod 3alia hashof expented bingo opponenet
+	if (opponent->getScore() - player->getScore() > 60)
+		w[3] = startW[3] + 0.4;
+	else
+		w[3] = startW[3];
+	if (bag->bagLen() < 11)
+		w[3] = startW[3] + 0.3;
+
+	double num = w[0] * expectedBingoMe(m) + w[1] * RackLeaveScore(m.word)
+			+ w[2] * QwithU(m.playedWord) + w[3] * DefensiveStrategy(m)
+			+ w[4] * expectedBingoMe(m);
+	return num;
+}
+
+double Heuristic::qSticking(Move& mv) {
+	if (bag->bagLen() > 7)
+		return 0.0;
+	if (!bag->getTieCount('Q' - 'A') && !bag->getTieCount('V' - 'A'))
+		return 0.0;
+	string rack = "";
+	for (int i = 0; i < 26; ++i)
+		for (int j = 0; j < (bag->getTieCount(i)); ++j)
+			rack += char(i + 'A');
+	if (bag->getTieCount(26))
+		rack += 'e';
+
+	Board newB = *board;
+	Player b = *player;
+	J->applyMove(mv, newB, b, *bag);
+	dec->execute(newB, rack, 100);
+	vector<Move> tmp = dec->getVector();
+	bool fnd1 = false;
+	bool fnd2 = true;
+	for (int j = 0; j < (int) tmp.size() && !(fnd1 & fnd2); ++j) {
+		for (int k = 0; k < (int) tmp[j].playedWord.size(); ++k)
+			if (tmp[j].playedWord[k] == 'Q')
+				fnd1 = true;
+			else if (tmp[j].playedWord[k] == 'V')
+				fnd2 = true;
+
+	}
+	if (!fnd1 && !fnd2)
+		return 100.0;
+	if (!fnd1)
+		return 50.0;
+	if (!fnd2)
+		return 25.0;
+	return 0.0;
+
+}
+
 //----------------------->will be modified later depending on what will bs sent
 double Heuristic::DefensiveStrategy(Move move) {
 	double perm = 0.0;
@@ -261,11 +320,11 @@ double Heuristic::DefensiveStrategy(Move move) {
 	newWord.push_back(move.direction);
 	if (newWord[0] == 0) {
 		newWord.push_back(move.y);
-		for (int i = 0; i < move.word.size(); ++i)
+		for (int i = 0; i < (int) move.word.size(); ++i)
 			newWord.push_back(move.x + i);
 	} else {
 		newWord.push_back(move.x);
-		for (int i = 0; i < move.word.size(); ++i)
+		for (int i = 0; i < (int) move.word.size(); ++i)
 			newWord.push_back(move.y + i);
 	}
 
@@ -433,51 +492,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	return -n * perm;
 }
 
-double Heuristic::getHeu(Move& m) {
-	// lma omnia trod 3alia hashof expented bingo opponenet
-
-	double ds = 0;
-	J->applyMove(m, *board, *player, *bag);
-	if (state == 0)
-		ds = DefensiveStrategy(m);
-	double num = 0.8 * expectedBingoMe(m) + ds + RackLeaveScore(m.word)
-			+ 0.5 * QwithU(m.playedWord);
-	return num;
-}
-
-void Heuristic::qSticking(vector<Move>& vec) {
-	if (bag->bagLen() > 7)
-		return;
-	if (!bag->getTieCount('Q' - 'A'))
-		return;
-	string rack = "";
-	for (int i = 0; i < 26; ++i)
-		for (int j = 0; j < (bag->getTieCount(i)); ++j)
-			rack += char(i + 'A');
-	if (bag->getTieCount(26))
-		rack += 'e';
-	vector<Move> ret;
-
-	for (int i = 0; i < vec.size(); ++i) {
-		Board newB = *board;
-		Player b = *player;
-		J->applyMove(vec[i], newB, b, *bag);
-		dec->execute(newB, rack);
-		vector<Move> tmp = dec->getVector();
-		bool fnd = false;
-		for (int j = 0; j < tmp.size() && !fnd; ++j) {
-			for (int k = 0; k < tmp[j].playedWord.size(); ++k)
-				if (tmp[j].playedWord[k] == 'Q') {
-					fnd = true;
-					break;
-				}
-		}
-		if (!fnd)
-			ret.push_back(vec[i]);
-	}
-}
-
-void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
+void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
 	int mcount = possibleMoves.size();
 	string word1, word2;
@@ -485,43 +500,41 @@ void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 	bool x;
 	int score;
 	std::size_t found;
-	// a map of the characters with the opponent to easily check which chars he has
-	map<char, int> or ;
-	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
+// a map of the characters with the opponent to easily check which chars he has
+	map<char, int> Or;
+	for (int i = 0; i < (int) oPPrack.size(); ++i)
+		Or.insert( { oPPrack[i], 0 });
 
 	for (int i = 0; i < mcount - 1; ++i) {
 		wlen = possibleMoves[i].word.length();
 		score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
-		possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
-		for (int j = i + 1; j < mcount; ++j)
-		{
+		possibleMoves[i].heuristicValue += score
+				/ possibleMoves[i].playedWord.length();
+		for (int j = i + 1; j < mcount; ++j) {
 			//which word is longer
 			wlen2 = possibleMoves[j].word.length();
 			if (wlen > wlen2) {
 				word1 = possibleMoves[i].word;
 				word2 = possibleMoves[j].word;
 				x = true; // the ith word is the greater  
-			}
-			else if (wlen2 > wlen) {
+			} else if (wlen2 > wlen) {
 				word2 = possibleMoves[i].word;
 				word1 = possibleMoves[j].word;
 				x = false; //jth word is the greater
 			}
 
-
 			found = word1.find(word2);  // check it word2 is subset of word1
-			if (found == 0)
-			{
+			if (found == 0) {
 				//check if the other chars are with the opponent too
-				for (int ww = found + word2.length(); ww < word1.length(); ++ww)
+				for (int ww = found + word2.length(); ww < (int) word1.length();
+						++ww)
 					// check if the letters are with the opponent
-					if (or .count(word1[ww])) {
+					if (Or.count(word1[ww])) {
 
 						if (x) {
 							possibleMoves.erase(possibleMoves.begin() + j);
 							possibleMoves[i].heuristicValue += 10;
-						}
-						else { //remove the ith word and break from the j loop 
+						} else { //remove the ith word and break from the j loop
 							possibleMoves.erase(possibleMoves.begin() + i);
 							possibleMoves[j].heuristicValue += 10;
 							j = mcount;  // to break the jth loop
@@ -535,5 +548,4 @@ void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 	}
 
 	std::sort(possibleMoves.begin(), possibleMoves.end());
-
 }

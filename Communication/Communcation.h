@@ -22,15 +22,17 @@ class Communcation {
 	Bag* bag;
 	dictionary* dic;
 	Heuristic* heu;
+	Move myLast, hisLast;
 public:
 	Communcation();
 	bool checkStrings(Move_to_from_server);
-	void start(commToImp msg);
+	impToInt start(intToImp msg);
 	Move castToMove(Move_to_from_server&);
 	Move_to_from_server castToServerMove(Move&);
+	void addPlayerTies(uint8_t tiles[]);
+	void applyOpponentMove(Move& mv, uint8_t tiles[]);
 
 	virtual ~Communcation();
 }
 ;
-
 #endif /* COMMUNICATION_COMMUNCATION_H_ */
