@@ -107,10 +107,13 @@ vector<string> dictionary::cast(int board[15][15]) {
 	for (int i = 0; i < 15; ++i) {
 		string s;
 		for (int j = 0; j < 15; ++j) {
-			if (board[i][j] == -1)
+			int x=board[i][j];
+			if(x>99)
+				x-=100;
+			if (x == -1)
 				s += ' ';
 			else
-				s += (char)board[i][j] + 97;
+				s += (char)x + 97;
 		}
 		rvec.push_back(s);
 	}
