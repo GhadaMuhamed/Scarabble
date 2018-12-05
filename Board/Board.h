@@ -54,6 +54,7 @@ public:
 	bool isValidPos(int tie, int posX, int posY);
 	bool isValidWords(string& horWord, string& verWord);
 	int getMultiplierLetter(int posX, int posY);
+	bool clearMultiplierLetter(int posX, int posY);
 	int getMultiplierWord(int posX, int posY);
 	int tiesCount();
 	void getBoard(uint8_t b[][BOARD_SIZE]);

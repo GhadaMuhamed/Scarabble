@@ -199,6 +199,12 @@ int Board::getMultiplierLetter(int posX, int posY) {
 	return multiplier_letter[posX][posY];
 }
 
+bool Board::clearMultiplierLetter(int posX, int posY) {
+	if (posX < 0 || posY >= 15) return false;
+	multiplier_letter[posX][posY] = 0;
+	return true;
+}
+
 int Board::getMultiplierWord(int posX, int posY) {
 	return multiplier_word[posX][posY];
 }

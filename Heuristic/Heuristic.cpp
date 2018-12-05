@@ -66,9 +66,9 @@ void Heuristic::setPlayer(Player& p) {
 bool Heuristic::filterPossibles(string s, int cur[]) {
 	int freq[27];
 	memset(freq, 0, sizeof(freq));
-	for (int j = 0; j < (int) s.size(); ++j)
-		if (s[j] >= 'A' && s[j] <= 'Z')
-			freq[s[j] - st]++;
+	for (char j : s)
+		if (j >= 'A' && j <= 'Z')
+			freq[j - st]++;
 		else
 			freq[26]++;
 	for (int j = 0; j < 27; ++j)
@@ -132,16 +132,16 @@ double Heuristic::expectedBingoMe(Move& move) {
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
 	//possible = filterPossibles(possible, cur);
 	double p = 0;
-	for (int i = 0; i < (int) possible.size(); ++i) {
+	for (auto &i : possible) {
 		memset(freq, 0, sizeof(freq));
-		for (int j = 0; j < (int) possible[i].first.size(); ++j)
-			if (possible[i].first[j] >= 'A' && possible[i].first[j] <= 'Z')
-				freq[possible[i].first[j] - st]++;
+		for (int j = 0; j < (int) i.first.size(); ++j)
+			if (i.first[j] >= 'A' && i.first[j] <= 'Z')
+				freq[i.first[j] - st]++;
 			else
 				freq[26]++;
 
 		// calculate the expected number of the score to make this word
-		p += calcProbability(freq, possible[i].second, cur);
+		p += calcProbability(freq, i.second, cur);
 	}
 	return p; // multiply  p * 0.8 assuming prob of bingo in the next play will decrease by 0.2
 }
@@ -149,10 +149,10 @@ double Heuristic::QwithU(string m) {
 	int cntQ = 0;
 	int cntU = 0;
 
-	for (int i = 0; i < (int) m.size(); ++i)
-		if (m[i] == 'Q')
+	for (char i : m)
+		if (i == 'Q')
 			cntQ++;
-		else if (m[i] == 'U')
+		else if (i == 'U')
 			cntU++;
 	if (cntQ && cntU)
 		return 30.0;
