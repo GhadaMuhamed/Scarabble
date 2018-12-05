@@ -25,7 +25,7 @@ Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 			-1.0 }, { 'n', 0.5 }, { 'o', -1.5 }, { 'p', -1.5 }, { 'q', -11.5 },
 			{ 'r', 1.5 }, { 's', 7.5 }, { 't', 0.0 }, { 'u', -3.0 },
 			{ 'v', -5.5 }, { 'w', -4.0 }, { 'x', 3.5 }, { 'y', -2.0 }, { 'z',
-					2.0 }, { '*', 24.5 } // '*' means blank
+					2.0 }, { 'e', 24.5 } // '*' means blank
 	};
 
 	//Duplicate weights
@@ -35,7 +35,7 @@ Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 			{ 'm', -2.0 }, { 'n', -2.5 }, { 'o', -3.5 }, { 'p', -2.5 },
 			{ 'q', 0 }, { 'r', -3.5 }, { 's', -4.0 }, { 't', -2.5 },
 			{ 'u', -3.0 }, { 'v', -3.5 }, { 'w', -4.5 }, { 'x', 0 },
-			{ 'y', -4.5 }, { 'z', 0 }, { '*', 15.0 } };
+			{ 'y', -4.5 }, { 'z', 0 }, { 'e', 15.0 } };
 	/*j,k,q,x,z mknsh lehm rkm w 5lthm bzero,mmkn ab2a ashelhm mn lmap dh
 	 w a5od rkmhm mn fo2 k2nhm msh duplicate!
 	 */
@@ -492,60 +492,83 @@ double Heuristic::DefensiveStrategy(Move move) {
 	return -n * perm;
 }
 
-void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
+void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
-	int mcount = possibleMoves.size();
-	string word1, word2;
-	int wlen, wlen2;
-	bool x;
+	int mcount = possibleMoves.size();  //the # of possible moves
+	string iw,jw; 
+	int wlen, wlen2,ww;
 	int score;
 	std::size_t found;
-// a map of the characters with the opponent to easily check which chars he has
-	map<char, int> Or;
-	for (int i = 0; i < (int) oPPrack.size(); ++i)
-		Or.insert( { oPPrack[i], 0 });
+	// a map of the characters with the opponent to check if a ceratin char is with him or not
+	map<char, int> or ;
+	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
 
 	for (int i = 0; i < mcount - 1; ++i) {
-		wlen = possibleMoves[i].word.length();
+
+		// the formed word
+		if (possibleMoves[i].direction == 0) iw = board->getHorizontalWord(possibleMoves[i].x, possibleMoves[i].y);
+		else
+			iw=board->getVerticalWord(possibleMoves[i].x, possibleMoves[i].y);
+
+		wlen =iw.length();
 		score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
-		possibleMoves[i].heuristicValue += score
-				/ possibleMoves[i].playedWord.length();
-		for (int j = i + 1; j < mcount; ++j) {
+		possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
+
+		for (int j = i + 1; j < mcount; ++j)
+		{
+			// the formed word
+			if (possibleMoves[j].direction == 0) jw = board->getHorizontalWord(possibleMoves[j].x, possibleMoves[j].y);
+			else
+				jw = board->getVerticalWord(possibleMoves[j].x, possibleMoves[j].y);
+
 			//which word is longer
-			wlen2 = possibleMoves[j].word.length();
+			wlen2 = jw.length();
 			if (wlen > wlen2) {
-				word1 = possibleMoves[i].word;
-				word2 = possibleMoves[j].word;
-				x = true; // the ith word is the greater  
-			} else if (wlen2 > wlen) {
-				word2 = possibleMoves[i].word;
-				word1 = possibleMoves[j].word;
-				x = false; //jth word is the greater
-			}
-
-			found = word1.find(word2);  // check it word2 is subset of word1
-			if (found == 0) {
-				//check if the other chars are with the opponent too
-				for (int ww = found + word2.length(); ww < (int) word1.length();
-						++ww)
-					// check if the letters are with the opponent
-					if (Or.count(word1[ww])) {
-
-						if (x) {
-							possibleMoves.erase(possibleMoves.begin() + j);
-							possibleMoves[i].heuristicValue += 10;
-						} else { //remove the ith word and break from the j loop
+				found = iw.find(jw);  // check if the smaller word is subset of the other
+				if (found == 0) {
+					for (ww = found + jw.length(); ww < iw.length(); ++ww) {
+						// check if the letters are with the opponent
+						if (or .count(iw[ww])) {
 							possibleMoves.erase(possibleMoves.begin() + i);
 							possibleMoves[j].heuristicValue += 10;
 							j = mcount;  // to break the jth loop
+							break;    //break from this loop
 						}
 					}
+					if (ww == iw.length()) {
+						//remove the jth word
+						possibleMoves.erase(possibleMoves.begin() + j);
+						possibleMoves[i].heuristicValue += 10;
 
-				break;
+					}
+				}
+				
+
+			}
+			else if (wlen2 > wlen) {
+				found = jw.find(iw);  // check if the smaller word is subset of the other
+				if (found == 0) {
+					for (ww = found + iw.length(); ww < jw.length(); ++ww) {
+						// check if the letters are with the opponent
+						if (or .count(jw[ww])) {
+							//remove the jth word
+							possibleMoves.erase(possibleMoves.begin() + j);
+							possibleMoves[i].heuristicValue += 10;
+							break;    //break from this loop
+						}
+					}
+					if (ww == jw.length()) {
+						possibleMoves.erase(possibleMoves.begin() + i);
+						possibleMoves[j].heuristicValue += 10;
+						break;    //break from the jth loop
+
+					}
+				}
 			}
 
-		}
+			
 	}
 
 	std::sort(possibleMoves.begin(), possibleMoves.end());
+
 }
