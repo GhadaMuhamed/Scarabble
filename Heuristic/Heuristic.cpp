@@ -63,19 +63,42 @@ void Heuristic::setPlayer(Player& p) {
 	player = &p;
 }
 
-bool Heuristic::filterPossibles(string s, int cur[]) {
+pair<bool, pair<int, int> > Heuristic::filterPossibles(string& s, int cur[]) {
 	int freq[27];
 	memset(freq, 0, sizeof(freq));
+	int blank = cur[26];
 	for (int j = 0; j < (int) s.size(); ++j)
 		if (s[j] >= 'A' && s[j] <= 'Z')
 			freq[s[j] - st]++;
 		else
-			freq[26]++;
-	for (int j = 0; j < 27; ++j)
-		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag->getTieCount(j))))
-			return false;
+			freq[s[j] - 'a']++, s[j] = toupper(s[j]);
+	int f = -1, sec = -1;
+	for (int j = 0; j < 26; ++j) {
+		if (freq[j] < cur[j])
+			return {false, {0,0}};
+		if (freq[j] > cur[j] + bag->getTieCount(j)) {
+			if ((freq[j] - (cur[j] + bag->getTieCount(j))) == 1) {
+				blank--;
+				if (blank < 0)
+					return {false, {0,0}};
+				if (f != -1)
+					sec = j;
+				else
+					f = j;
 
-	return true;
+			}
+			if ((freq[j] - (cur[j] + bag->getTieCount(j))) == 2) {
+				blank -= 2;
+				if (blank < 0)
+					return {false, {0,0}};
+				f = sec = j;
+			}
+
+			else
+				return {false, {0,0}};
+		}
+	}
+	return {true, {f,sec}};
 
 }
 ///implement for omnia
@@ -89,11 +112,16 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 	for (int i = 0; i < (int) v.size(); ++i) {
 		if (v[i].word.size())
 			continue;
-		if (!filterPossibles(v[i].playedWord, cur))
+		pair<bool, pair<int, int> > pa = filterPossibles(v[i].playedWord, cur);
+		if (!pa.first)
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
 		int score = J->applyMoveNoChange(v[i], *board, *bag);
+		if (pa.second.first != -1)
+			score -= bag->getTieScore(pa.second.first);
+		if (pa.second.second != -1)
+			score -= bag->getTieScore(pa.second.second);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}
@@ -130,7 +158,7 @@ double Heuristic::expectedBingoMe(Move& move) {
 			cur[word[i] - st]++;
 
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
-	//possible = filterPossibles(possible, cur);
+//possible = filterPossibles(possible, cur);
 	double p = 0;
 	for (int i = 0; i < (int) possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
@@ -183,7 +211,7 @@ double Heuristic::RackLeaveScore(string C) {
 	double score = 0.0;
 
 	char x;
-	map<char, double> m;  // The accumulative weight for each letter in the rack
+	map<char, double> m; // The accumulative weight for each letter in the rack
 	int v = 0, c = 0; //the number of vowels and constants
 
 	for (int i = 0; i < (int) C.length(); i++) {
@@ -262,7 +290,7 @@ void Heuristic::getChange(char* ex) {
 }
 
 double Heuristic::getHeu(Move& m) {
-	// lma omnia trod 3alia hashof expented bingo opponenet
+// lma omnia trod 3alia hashof expented bingo opponenet
 	if (opponent->getScore() - player->getScore() > 60)
 		w[3] = startW[3] + 0.4;
 	else
@@ -377,7 +405,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
@@ -396,7 +424,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
@@ -416,7 +444,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	else {
 		//above the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -434,7 +462,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -453,7 +481,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
@@ -472,7 +500,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
@@ -537,7 +565,7 @@ void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 						} else { //remove the ith word and break from the j loop
 							possibleMoves.erase(possibleMoves.begin() + i);
 							possibleMoves[j].heuristicValue += 10;
-							j = mcount;  // to break the jth loop
+							j = mcount; // to break the jth loop
 						}
 					}
 

@@ -24,12 +24,12 @@ class Heuristic {
 	const string mostUsedLetters = "etaoinshrdlcumwfgypbvkjxqz";
 	int state;
 	map<char, double> L1, L2;
-	double w[4];
-	double startW[4];
+	double w[5];
+	double startW[5];
 public:
 	Heuristic(Board&, dictionary&, Bag&, Judge&, Player&, Player&);
 	vector<pair<string, int>> getPossibleBingo(string str, int cut[]);
-	bool filterPossibles(string s, int cur[]);
+	pair<bool, pair<int, int> > filterPossibles(string& s, int cur[]);
 	double calcProbability(int freq[], int score, int cur[]);
 	double expectedBingoMe(Move& move);
 	double expectedBingoOpponent();
