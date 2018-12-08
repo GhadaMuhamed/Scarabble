@@ -58,6 +58,8 @@ public:
 	int tiesCount();
 	void getBoard(uint8_t b[][BOARD_SIZE]);
 	Board& operator=(Board const& myObj);
+	string getRow(int i);
+	string getCoulmn(int i);
 };
 
 #endif //SCRABBLE_BOARD_H
