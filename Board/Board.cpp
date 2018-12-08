@@ -212,3 +212,19 @@ Board& Board::operator=(Board const& myObj) {
 int Board::tiesCount() {
 	return ties_count;
 }
+string Board::getRow(int i) {
+	string row = "";
+	for (int j = 0; j < 15;++j) {
+		row += (board[i][j] != -1)?  char(board[i][j] + 'A'): ' ';
+	}
+	return row;
+}
+string Board::getCoulmn(int i) {
+
+	string col = "";
+	for (int j = 0; j < 15; ++j) {
+		col += (board[j][i] != -1) ? char(board[j][i] + 'A') : ' ';
+	}
+	return col;
+}
+
