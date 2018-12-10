@@ -51,13 +51,18 @@ public:
 	string getVerticalWord(int posX, int posY);
 	int getHorizontalWordScore(int posX, int posY);
 	int getVerticalWordScore(int posX, int posY);
+	string getHorizontalWordWithTie(int posX, int posY, int tie);
+    string getVerticalWordWithTie(int posX, int posY, int tie);
 	bool isValidPos(int tie, int posX, int posY);
 	bool isValidWords(string& horWord, string& verWord);
 	int getMultiplierLetter(int posX, int posY);
+	bool clearMultiplierLetter(int posX, int posY);
 	int getMultiplierWord(int posX, int posY);
 	int tiesCount();
 	void getBoard(uint8_t b[][BOARD_SIZE]);
 	Board& operator=(Board const& myObj);
+	string getRow(int i);
+	string getCoulmn(int i);
 };
 
 #endif //SCRABBLE_BOARD_H

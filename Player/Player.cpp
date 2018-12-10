@@ -5,12 +5,8 @@
 using namespace std;
 #include "Player.h"
 Player::Player(int playerId) :
-		playerId(playerId) {
-	if (playerId == 0)
-		memset(myTies, 0, sizeof myTies);
-	else
-		for (int i = 0; i < 27; ++i)
-			myTies[i] = 100;
+    playerId(playerId) {
+    memset(myTies, 0, sizeof myTies);
 
 }
 Player::Player() {
@@ -19,7 +15,6 @@ Player::Player() {
 }
 
 void Player::addValue(int v, int tie) {
-
 	myTies[tie] = v;
 }
 int Player::getValue(int tie) {
@@ -38,8 +33,12 @@ bool Player::addTie(int tie) {
 }
 
 bool Player::playTie(int tie) {
-	if (tie < 0 || tie > 26 || myTies[tie] <= 0)
-		return false; // the player doesn't have any ties
+    if (playerId == 1)
+        return true;
+
+    if (tie < 0 || tie > 26 || myTies[tie] <= 0)
+        return false; // the player doesn't have any ties
+
 	myTies[tie]--;
 	totalTies--;
 	return true;
@@ -73,9 +72,13 @@ string Player::getTieStr() {
 		for (int j = 0; j < myTies[i]; ++j)
 			s += ('A' + i);
 
-	if (myTies[26])
+	for (int i=0;i<myTies[26];++i)
 		s += 'e';
 	return s;
+}
+
+void  Player::setTotalTies(int t) {
+	totalTies = t;
 }
 
 ostream& operator<<(ostream& os, Player const& myObj) {

@@ -21,7 +21,15 @@ int findInVector(nodeG** pointers, const char &c)
 		else
 			return 27;
 
-	int temp = (int)c % 97 + 1;
+    int temp=0;
+    if((c>='A'&&c<='Z'))
+    {
+        temp=(int)c % 65 + 1;
+    }
+    else
+        if(c>='a'&&c<='z')
+	    temp = (int)c % 97 + 1;
+        else return -1;
 	if (pointers[temp] == nullptr)
 		return -1;
 	else return temp;
@@ -97,6 +105,20 @@ void GADDAG::search(std::string word)
 
 void GADDAG::select(nodeG *myroot, std::string word,std::string board, int start, int &globalStart, std::string newWord ,int indicator,int first,bool check,int vecSize)
 {
+    for(int i=0;i<word.length();++i)
+    if(!((word[i]>='a'&&word[i]<='z')||word[i]=='E'))
+    {
+        cout<<word<<endl;
+        cin>>word;
+        return;
+    }
+    for(int i=0;i<board.length();++i)
+        if(!((board[i]>='a'&&board[i]<='z')||(board[i]>='A'&&board[i]<='Z')||board[i]==' '))
+        {
+            cout<<board<<" 000 "<<endl;
+            cin>>word;
+            return;
+        }
 	if (vecSize > -1 && this->returnVector.size() >= vecSize)
 		return;
 	//me7tag a3raf el kelma bedaytha menen aw 3ala el aa2al me4 ad eh le7ad ma 3amelt reverse
@@ -133,7 +155,7 @@ void GADDAG::select(nodeG *myroot, std::string word,std::string board, int start
 		//if you found a char on the board you must continue in your direction 
 		char tempchar;
 		if (board[start] >= 'A'&&board[start] <= 'Z')
-			tempchar =(char)((int)board[start] - 32);
+			tempchar =(char)((int)board[start] + 32);
 		else
 			tempchar = board[start];
 		int x = findInVector(myroot->pointers, tempchar);

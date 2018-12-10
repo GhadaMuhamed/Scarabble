@@ -5,7 +5,15 @@
 #ifndef SCARABBLE_SUPERLEAVESTRIE_H
 #define SCARABBLE_SUPERLEAVESTRIE_H
 
-#include <bits/stdc++.h>
+#include<iostream>
+#include<cmath>
+#include<map>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include<fstream>
+#include <sstream>
+#include <queue>
 #include "../Player/Player.h"
 #include "../Move/Move.h"
 
@@ -21,9 +29,16 @@ struct TrieNode
     // isEndOfWord is true if the node
     // represents end of a word
     double isEndOfWord = -FLOAT_MAX;
+    TrieNode() {
+        for (int i = 0; i < ALPHABET_SIZE; i++)
+        {
+            children[i] = NULL;
+        }
+    }
 };
 
 class SuperLeavesTrie {
+
     TrieNode* root = nullptr;
 
 
@@ -35,16 +50,12 @@ class SuperLeavesTrie {
     struct TrieNode *getNode() {
         auto *pNode = new TrieNode;
 
-        pNode->isEndOfWord = -FLOAT_MAX;
-
-        for (auto &i : pNode->children)
-            i = nullptr;
 
         return pNode;
     }
 
     void insert(string key, double leafValue) {
-        struct TrieNode *pCrawl = root;
+        TrieNode *pCrawl = root;
 
         for (int i : key) {
             if (!pCrawl->children[i])
@@ -122,7 +133,7 @@ class SuperLeavesTrie {
 public:
     SuperLeavesTrie() {
         root = new TrieNode;
-        loadSuperLeaves("/home/riham/Documents/Machine Inteligence/Scarabble/SuperLeavesTrie/superleaves");
+        loadSuperLeaves("superleaves");
     }
 
     double getFromHeuristic(Player p) {
@@ -150,7 +161,7 @@ public:
         return best_move;
     }
 
-    vector<Move> getBest23(vector<Move> moves) {
+    vector<Move> getBestN(vector<Move> moves, int cnt) {
         priority_queue<Move> best_moves;
         for (Move& move: moves) {
             string played_s = move.playedWord;
@@ -161,8 +172,8 @@ public:
             best_moves.push(move);
         }
         moves.clear();
-        int cnt = 23;
-        while (cnt--) moves.push_back(best_moves.top()), best_moves.pop();
+
+        while (cnt-- && (int )best_moves.size()) moves.push_back(best_moves.top()), best_moves.pop();
         return moves;
     }
 };

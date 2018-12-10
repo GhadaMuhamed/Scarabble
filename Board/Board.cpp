@@ -16,6 +16,12 @@
 
 #include "Board.h"
 using namespace std;
+/*
+ * Board empty position => -1
+ * Board characters => 0 ~ 25
+ * Board blank characters => 100 ~ 125
+ * */
+
 
 void Board::initBoard() {
 	// init multiplier letter as 1
@@ -53,7 +59,7 @@ void Board::initBoard() {
 }
 
 Board::Board() {
-
+	initBoard();
 }
 Board::Board(uint8_t b[][BOARD_SIZE]) {
 	for (int i = 0; i < BOARD_SIZE; ++i)
@@ -65,7 +71,7 @@ Board::Board(uint8_t b[][BOARD_SIZE]) {
 ostream& operator<<(ostream& os, Board const& myObj) {
 	for (auto &i : myObj.board) {
 		for (int j : i) {
-			os << myObj.scores[j] << char(j + 'A') << " ";
+			os << (j == -1? 0 : myObj.scores[j]) << char(j + 'A') << " ";
 		}
 		os << endl;
 	}
@@ -78,11 +84,11 @@ int Board::getBoardValue(int posX, int posY) {
 void Board::getBoard(uint8_t b[][BOARD_SIZE]) {
 	for (int i = 0; i < BOARD_SIZE; ++i)
 		for (int j = 0; j < BOARD_SIZE; ++j)
-			b[i][j] = board[i][j];
+			b[i][j] = (uint8_t) board[i][j];
 }
 
 bool Board::putFirstTie(int tie) {
-	if (tie < 0 || tie > 26 || board[starPos][starPos] != -1)
+	if (!((tie >= 0 && tie < 27) || (tie >= 100 && tie < 126)) || board[starPos][starPos] != -1)
 		return false;
 	board[starPos][starPos] = tie;
 	ties_count++;
@@ -90,7 +96,7 @@ bool Board::putFirstTie(int tie) {
 }
 
 bool Board::isValidPos(int tie, int posX, int posY) {
-	return tie >= 0 && tie < 27 && posX >= 0 && posX < 15 && posY >= 0
+	return ((tie >= 0 && tie < 27) || (tie >= 100 && tie < 126)) && posX >= 0 && posX < 15 && posY >= 0
 			&& posY < 15;
 }
 
@@ -123,35 +129,61 @@ bool Board::isValidMove(int posX, int posY, int tie) {
 	return false;
 }
 
+// assumes that this position is occupied
+// if the board value between 100~125 then the char is small
 string Board::getHorizontalWord(int posX, int posY) {
 	string horizontalWord = "";
 	int r = posX, c = posY;
 	// if it's a blank tie it should be handled to be replaced by a suitable char
 	while (c >= 0 && board[r][c] != -1) {
-		horizontalWord = char(board[r][c] + 'A') + horizontalWord;
+		if (board[r][c] >= 100 && board[r][c] < 126)
+			horizontalWord = char(board[r][c] - 100 + 'a') + horizontalWord;
+		else horizontalWord = char(board[r][c] + 'A') + horizontalWord;
 		c--;
 	}
 	c = posY + 1;
 	while (c < BOARD_SIZE && board[r][c] != -1) {
-		horizontalWord += char(board[r][c] + 'A');
+		if (board[r][c] >= 100 && board[r][c] < 126)
+			horizontalWord += char(board[r][c] - 100 + 'a');
+		else horizontalWord += char(board[r][c] + 'A');
 		c++;
 	}
 	return horizontalWord;
 }
 
+// assumes that this position is occupied
+// if the board value between 100~125 then the char is small
 string Board::getVerticalWord(int posX, int posY) {
 	string verticalWord = "";
 	int r = posX, c = posY;
 	while (r >= 0 && board[r][c] != -1) {
-		verticalWord = char(board[r][c] + 'A') + verticalWord;
+		if (board[r][c] >= 100 && board[r][c] < 126)
+			verticalWord = char(board[r][c] - 100 + 'a') + verticalWord;
+		else verticalWord = char(board[r][c] + 'A') + verticalWord;
 		r--;
 	}
 	r = posX + 1;
 	while (r < BOARD_SIZE && board[r][c] != -1) {
-		verticalWord += char(board[r][c] + 'A');
+		if (board[r][c] >= 100 && board[r][c] < 126)
+			verticalWord += char(board[r][c] - 100 + 'a');
+		else verticalWord += char(board[r][c] + 'A');
 		r++;
 	}
 	return verticalWord;
+}
+
+string Board::getHorizontalWordWithTie(int posX, int posY, int tie) {
+	swap(board[posX][posY], tie);
+	string horWord = getHorizontalWord(posX, posY);
+	swap(board[posX][posY], tie);
+	return horWord;
+}
+
+string Board::getVerticalWordWithTie(int posX, int posY, int tie) {
+	swap(board[posX][posY], tie);
+	string verWord = getVerticalWord(posX, posY);
+	swap(board[posX][posY], tie);
+	return verWord;
 }
 
 int Board::getHorizontalWordScore(int posX, int posY) {
@@ -159,13 +191,17 @@ int Board::getHorizontalWordScore(int posX, int posY) {
 
 	int r = posX, c = posY - 1;
 	while (c >= 0 && board[r][c] != -1) {
-		horizontalWordScore += scores[board[r][c]] * multiplier_letter[r][c];
+		if (board[r][c] >= 0 && board[r][c] < 26) { // if it wasn't blank then append it's score
+			horizontalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+		}
 		wordMultiplier *= multiplier_word[r][c];
 		c--;
 	}
 	c = posY + 1;
 	while (c < BOARD_SIZE && board[r][c] != -1) {
-		horizontalWordScore += scores[board[r][c]] * multiplier_letter[r][c];
+		if (board[r][c] >= 0 && board[r][c] < 26) { // if it wasn't blank then append it's score
+			horizontalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+		}
 		wordMultiplier *= multiplier_word[r][c];
 		c++;
 	}
@@ -177,13 +213,17 @@ int Board::getVerticalWordScore(int posX, int posY) {
 
 	int r = posX - 1, c = posY;
 	while (r >= 0 && board[r][c] != -1) {
-		verticalWordScore += scores[board[r][c]] * multiplier_letter[r][c];
+		if (board[r][c] >= 0 && board[r][c] < 26) { // if it wasn't blank then append it's score
+			verticalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+		}
 		wordMultiplier *= multiplier_word[r][c];
 		r--;
 	}
 	r = posX + 1;
 	while (r < BOARD_SIZE && board[r][c] != -1) {
-		verticalWordScore += scores[board[r][c]] * multiplier_letter[r][c];
+		if (board[r][c] >= 0 && board[r][c] < 26) { // if it wasn't blank then append it's score
+			verticalWordScore += scores[ board[r][c] ] * multiplier_letter[r][c];
+		}
 		wordMultiplier *= multiplier_word[r][c];
 		r++;
 	}
@@ -199,6 +239,12 @@ int Board::getMultiplierLetter(int posX, int posY) {
 	return multiplier_letter[posX][posY];
 }
 
+bool Board::clearMultiplierLetter(int posX, int posY) {
+	if (posX < 0 || posY >= 15) return false;
+	multiplier_letter[posX][posY] = 0;
+	return true;
+}
+
 int Board::getMultiplierWord(int posX, int posY) {
 	return multiplier_word[posX][posY];
 }
@@ -212,3 +258,19 @@ Board& Board::operator=(Board const& myObj) {
 int Board::tiesCount() {
 	return ties_count;
 }
+string Board::getRow(int i) {
+	string row = "";
+	for (int j = 0; j < 15;++j) {
+		row += (board[i][j] != -1)?  char(board[i][j] + 'A'): ' ';
+	}
+	return row;
+}
+string Board::getCoulmn(int i) {
+
+	string col = "";
+	for (auto &j : board) {
+		col += (j[i] != -1) ? char(j[i] + 'A') : ' ';
+	}
+	return col;
+}
+
