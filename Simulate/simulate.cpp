@@ -1,52 +1,40 @@
+#include<iostream>
+#include<cmath>
+#include<map>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include <sstream>
+#include<time.h>
+#include "../Heuristic/Heuristic.h"
+#include "../Judge/Judge.h"
+#include "simulate.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <bits/stdc++.h>
-
-#include"../Bag/Bag.h"
-#include"../Judge/Judge.h"
-#include"../Board/Board.h"
-#include "../Dictionary/dictionary.h"
 using namespace std;
-const int   m_bogowinArrayWidth = 602;
-const int m_bogowinArrayHeight = 94;
-float m_bogowin[m_bogowinArrayWidth][m_bogowinArrayHeight];
 
-bool loadBogowin(const string &filename)
+Move simualte::huristicMoves(Heuristic & heu, Board & board, Player & ana, Player & opponent, Bag b)
 {
-	for (int i = 0; i < m_bogowinArrayWidth; ++i)
-		for (int j = 0; j < m_bogowinArrayHeight; ++j)
-			m_bogowin[i][j] = 0;
+	string C;
+	heu.setBoard(board);
+	heu.setBag(b);
+	heu.setPlayer(ana);
+	vector<Move> allMoves = heu.getAllMoves();
+	Move BestMove;
+	int mx = -1;
 
-	ifstream file(filename.c_str());
-
-	if (!file.is_open())
-	{
-		cout << "Could not open " << filename << " to load bogowin heuristic" << endl;
-		return false;
+	for (int i = 0; i < allMoves.size(); ++i) {
+		float num = heu.getHeu(allMoves[i]);
+		if (num > mx)
+			mx = num, BestMove = allMoves[i];
+		heu.setBoard(board);
+		heu.setBag(b);
+		heu.setPlayer(ana);
 	}
-
-	while (!file.eof())
-	{
-		int lead, unseen;
-		double wins;
-
-		file >> lead;
-		file >> unseen;
-		file >> wins;
-
-		m_bogowin[lead + 300][unseen] = wins;
-	}
-
-	file.close();
-	return true;
+	return BestMove;
 }
 
-///// for riham 
-char  getChange(Player ana) {
-	return 'A';
-}
-
-void  random_rack(Bag & bag, Player & opponent) {
+void  simualte::radom_rack(Bag & bag, Player & opponent)
+{
 	srand(time(NULL));
 	int tot = bag.bagLen();
 	while (opponent.getTotalTies() < 7 && tot) {	////// for omnia
@@ -58,21 +46,15 @@ void  random_rack(Bag & bag, Player & opponent) {
 		tot--;
 		opponent.addTie(r);
 	}
-
-}
-vector<Move> getAllMoves(Player& p,Board board , dictionary dic ) {
-	dic.execute(board, p.getTieStr());
-	vector<Move> v = dic.getVector();
-	return v;
 }
 
-void  change(Bag & bag, Player & ply, vector<char> tiles) {
-	
+void simualte::change(Bag & bag, Player & ply, vector<char> tiles) {
+
 	srand(time(NULL));
 	int tot = bag.bagLen();
 	for (int i = 0; i < tiles.size(); ++i) {
 		int r = rand() % 27;
-		while (!bag.getTieCount(r)) {	//// for omnia
+		while (!bag.getTieCount(r)) {	
 			r = rand() % 27;
 		}
 		bag.removeTie(r);
@@ -83,84 +65,215 @@ void  change(Bag & bag, Player & ply, vector<char> tiles) {
 		bag.addTie((int)(tile - 'A'));
 	}
 }
+int simualte::ProbabilisticSearch(Heuristic & heu, int idx, Board & board, bool game, Player ana, Player opponent, Bag & bag, int cnt)
+{
+	if (J.isClosed(board) || idx >= depth || cnt >= 2) {	////////
+		return 0;
+		// mfrod azod 7aga hna huristic of board
+	}
+	int ret = 0;
+	if (game == 1) {
 
-int simulate(Board   & boardCopy, Player & anaCopy,Player & opponentCopy, Bag & bagCopy, dictionary dic, Judge j ) {
-    int score = 0;
-    if (j.isClosed(boardCopy))
-        return score;
-    random_rack(bagCopy, opponentCopy);
-    vector<Move> moves = getAllMoves(opponentCopy, boardCopy, dic);
-    if (moves.size() == 0) {
-        Move move;
-        move.tiles.push_back(getChange(opponentCopy));
-        change(bagCopy, opponentCopy, move.tiles);
-    } else {
-        Move move = getBest(moves);
-        score -= j.applyMove(move, boardCopy, anaCopy, bagCopy);
+		radom_rack(bag, opponent);
+		Move move = huristicMoves(heu, board, opponent, ana, bag);
+		if (move.switchMove) {
+			bool ex = false;
+			if (bag.bagLen() == 0)
+				ex = true;
+				ret -= ProbabilisticSearch(heu, idx + 1, board, 0, ana,
+						opponent, bag, cnt + ex);
+			}
+			else if (move.tiles.size() > 0) {
+				change(bag, opponent, move.tiles);
+				ret -=ProbabilisticSearch(heu, idx + 1, board, 0, ana,
+						opponent, bag, 0);
+			}
+			else {
+				int score = J.applyMove(move, board, opponent, bag);
+				ret -= ProbabilisticSearch(heu, idx + 1, board, 0, ana,
+						opponent, bag, 0) + score;
+			}
+		}
+		else {
+			 radom_rack(bag, ana);
+			Move move = huristicMoves(heu, board, ana, opponent, bag);
+			if (move.switchMove) {
+				bool ex = false;
+				if (bag.bagLen() == 0)
+					ex = true;
+				ret += ProbabilisticSearch(heu, idx + 1, board, 0, ana,
+						opponent, bag, cnt + ex);
+			}
+			else if (move.tiles.size() > 0) {
+				change(bag, opponent, move.tiles);
+				ret +=  ProbabilisticSearch(heu, idx + 1, board, 0, ana,
+						opponent, bag, 0);
 
-    }
-    if (j.isClosed(boardCopy))
-        return score;
-    random_rack(bagCopy, anaCopy);
-    moves = getAllMoves(anaCopy, boardCopy, dic);
-    if ((int) moves.size() == 0) {
-        Move move;
-        move.tiles.push_back(getChange(anaCopy));
-        change(bagCopy, anaCopy, move.tiles);
-    } else {
-        Move move = getBest(moves);
-        score += j.applyMove(move, boardCopy, anaCopy, bagCopy);
-    }
-    return score;
+			}
+			else {
+				int score = J.applyMove(move, board, ana, bag);
+				ret += (ProbabilisticSearch(heu, idx + 1, board, 1, ana,
+						opponent, bag, 0) + score);
+			}
+		}
+
+	return ret;
 }
 
-Move nextPlay( vector<Move> plays, Board board, Bag bag,
-	Player ana, Judge J, Player opponent, dictionary dic,vector<float>value) {
-	if (!(int) plays.size()) {
+int simualte::simFinal2(Heuristic & heu, int idx, Board & board, bool game, Player ana, Player opponent, Bag & bag, int sc,int cnt )
+{
+	if (J.isClosed(board)||cnt>=2) {	////////
+		string myReack = ana.getTieStr();
+		string hisReack = opponent.getTieStr();
+		int rackScore = 0;
+		for (int i = 0; i < myReack.length(); i++)
+		{
+			rackScore += bag.getTieScore(myReack[i] - 'A');
+			rackScore -= bag.getTieScore(hisReack[i] - 'A');
+		}
+		sc -= 2 * rackScore;
+		if (sc < 0)
+			return -1;
+		else if (sc > 0)
+			return 1;
+		return 0;
+		// mfrod azod 7aga hna huristic of board
+	}
+	int ret = 0;
+	if (game == 1) {
+		radom_rack(bag, opponent);
+		Move move = huristicMoves(heu, board, opponent, ana, bag);
+		if (move.switchMove) {
+			bool ex = false;
+			if (bag.bagLen() == 0)
+				ex = true;
+			ret += simFinal2(heu, idx + 1, board, 0, ana,
+				opponent, bag, sc, cnt + ex);
+		}
+		else if (move.tiles.size() > 0) {
+			change(bag, opponent, move.tiles);
+			ret += simFinal2(heu, idx + 1, board, 0, ana,
+				opponent, bag, sc, 0);
+		}
+		else {
+			int score = J.applyMove(move, board, opponent, bag);
+			ret += simFinal2(heu, idx + 1, board, 0, ana,
+				opponent, bag, sc + score, 0);
+		}
+	}
+	else {
+		radom_rack(bag, ana);
+		Move move = huristicMoves(heu, board, ana, opponent, bag);
+		if (move.switchMove) {
+			bool ex = false;
+			if (bag.bagLen() == 0)
+				ex = true;
+			ret += simFinal2(heu, idx + 1, board, 0, ana,
+				opponent, bag, sc,cnt+ex);
+		}
+		else if (move.tiles.size() > 0) {
+			change(bag, opponent, move.tiles);
+			ret += simFinal2(heu, idx + 1, board, 0, ana,
+				opponent, bag, sc,0);
+
+		}
+		else {
+			int score = J.applyMove(move, board, ana, bag);
+			ret += (simFinal2(heu, idx + 1, board, 1, ana,
+				opponent, bag, score+sc,0) );
+		}
+	}
+
+	return ret;
+}
+
+Move simualte::nextPlay(  Heuristic  heu, const vector<Move>& plays,
+	const  Board & board, const Bag & bag,  Player&  ana, const Judge & j,
+	Player& opponent,int d) {
+	if (plays.empty()) {
 		Move m;
-		// omnia 
-		m.tiles.push_back(getChange(ana));
+		heu.setPlayer(ana);
+		char *ex = new char[7];
+		heu.getChange(ex);
+		if (strlen(ex) == 0)
+			m.switchMove = true;
+		for (int i = 0; i < strlen(ex); ++i)
+			m.tiles.push_back(ex[i]);
+		return m;
+	}
+	depth = d;
+	Player anaCopy(ana.getPlayerID());
+	Player opponentCopy(opponent.getPlayerID());
+	Bag bagCopy = bag;
+	Board boardCopy = board;
+	int size = (int) plays.size();
+	int idx = 0;
+	double mx = -1e9;
+	for (int i = 0; i < plays.size(); ++i) {
+		for (int k = 0; k < 27; ++k) {
+			anaCopy.addValue(ana.getValue(k), k);
+		}
+
+		for (int k = 0; k < 27; ++k) {
+			opponentCopy.addValue(opponent.getValue(k), k);
+		}
+		boardCopy = board;
+		bagCopy = bag;
+		float score = J.applyMove(plays[i], boardCopy, anaCopy, bagCopy);
+		for (int k = 0; k < 1000; ++k) {
+			score += ProbabilisticSearch(heu, 0, boardCopy, 1, anaCopy, opponentCopy, bagCopy, 0);
+		}
+		if (mx < score) {
+			mx = score;
+			idx = i;
+		}
+	}
+	return plays[idx];
+}
+/*Move simualte::nextPlay(Heuristic  heu, const vector<Move>& plays,
+	const  Board & board, const Bag & bag, Player  ana, const Judge & j,
+	const Player & opponent, int score)
+{
+
+	if (!plays.size()) {
+		Move m;
+		heu.setPlayer(ana);
+		char* ex = new char[7];
+		heu.getChange(ex);
+		if (strlen(ex) == 0)
+			m.switchMove = true;
+		for (int i = 0; i < strlen(ex); ++i)
+			m.tiles.push_back(ex[i]);
 		return m;
 	}
 	Player anaCopy(ana.getPlayerID());
 	Player  opponentCopy(opponent.getPlayerID());
 	Bag bagCopy = bag;
 	Board boardCopy = board;
-	int size = (int) plays.size();
+	int size = (int)plays.size();
 	int idx = 0;
 	float mx = -1e9;
-	for (int i = 0; i < plays.size(); ++i) {
+	SuperLeavesTrie superLeavesTrie = SuperLeavesTrie();
+	vector<Move>validPlays = superLeavesTrie.getBestN(plays, 30);
+
+	for (int i = 0; i < validPlays.size(); ++i) {
 		for (int i = 0; i < 27; ++i) {
 			anaCopy.addValue(ana.getValue(i), i);
 		}
 		for (int i = 0; i < 27; ++i) {
 			opponentCopy.addValue(opponent.getValue(i), i);
 		}
-		float score = J.applyMove(plays[i], boardCopy, anaCopy, bagCopy);	/////for omnia
-		int reminder = 100 - anaCopy.getTotalTies() - boardCopy.tiesCount();
-		for (int k = 0; k < 300; ++k) {
-			score += simulate(boardCopy, anaCopy,
-				opponentCopy, bagCopy,dic,J);
-			score += getFromHurastic(anaCopy);
+		boardCopy = board;
+		bagCopy = bag;
+		float  score = J.applyMove(validPlays[i], boardCopy, anaCopy, bagCopy);
+		for (int k = 0; k < 1000; ++k) {
+			score += simFinal2(heu, 0, boardCopy, 1, anaCopy, opponentCopy, bagCopy, score,0);
+
 		}
-		score /= 300;
-		int intScore = (int)round(score);
-		if (intScore > 300)
-			intScore = 300;
-		if (intScore < -300)
-			intScore = -300;
-		if (mx < m_bogowin[intScore][reminder])
-			mx = m_bogowin[intScore][reminder], idx = i;
-		else if (mx == m_bogowin[intScore][reminder]) {
-			if (value[i] < value[idx])
-				idx = i;
-		
+		if (mx < score) {
+			mx = score;
+			idx = i;
 		}
 	}
-	return plays[idx];
-}
-
-int main() {
-	loadBogowin("bogowin.txt");
-
-}
+	return validPlays[idx];
+}*/

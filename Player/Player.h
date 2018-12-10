@@ -6,7 +6,7 @@
 #ifndef SCRABBLE_PLAYER_H
 #define SCRABBLE_PLAYER_H
 
-
+#include <bits/stdc++.h>
 
 
 using namespace std;

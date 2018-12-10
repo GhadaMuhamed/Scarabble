@@ -51,6 +51,8 @@ public:
 	string getVerticalWord(int posX, int posY);
 	int getHorizontalWordScore(int posX, int posY);
 	int getVerticalWordScore(int posX, int posY);
+	string getHorizontalWordWithTie(int posX, int posY, int tie);
+    string getVerticalWordWithTie(int posX, int posY, int tie);
 	bool isValidPos(int tie, int posX, int posY);
 	bool isValidWords(string& horWord, string& verWord);
 	int getMultiplierLetter(int posX, int posY);
