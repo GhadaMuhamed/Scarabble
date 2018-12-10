@@ -4,10 +4,8 @@
 
 #include "Judge.h"
 #include "../Bag/Bag.h"
-Judge::Judge(dictionary d): dic(d) {
 
-}
-
+Judge::Judge() {}
 
 int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
     // it applies the move and do changes on the variables
@@ -79,7 +77,7 @@ int Judge::applyMoveNoChange(const Move &move, Board &board, Bag &bag) {
 	return score * wordMultiplier + asideScores;
 }
 
-bool Judge::isValidMove(Move move, Board board) {
+bool Judge::isValidMove(Move move, Board& board, dictionary& dic) {
     string playedWord = move.playedWord;
     if (move.switchMove || !move.tiles.empty()) // if it's exchange or pass then okay it's vaid
     {

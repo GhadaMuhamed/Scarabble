@@ -106,7 +106,7 @@ pair<bool, pair<int, int> > Heuristic::filterPossibles(string& s, int cur[]) {
 vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 	while (str.size() < 7)
 		str += 'e';
-	dec->execute(*board, str, 100);
+	dec->execute(*board, str, 5);
 	vector<Move> v = dec->getVector();
 	vector<pair<string, int> > ret;
 	for (int i = 0; i < (int) v.size(); ++i) {
@@ -247,9 +247,13 @@ double Heuristic::RackLeaveScore(string C) {
 	return score;
 }
 vector<Move> Heuristic::getAllMoves() {
-	dec->execute(*board, player->getTieStr());
+    static int cnt=0;
+	string s=player->getTieStr();
+	dec->execute(*board, s);
 	vector<Move> v = dec->getVector();
-	return v;
+    cnt++;
+    cout<<cnt<<endl;
+    return v;
 }
 void Heuristic::getChange(char* ex) {
 	int size = bag->bagLen() - 7;
@@ -348,11 +352,11 @@ double Heuristic::DefensiveStrategy(Move move) {
 	newWord.push_back(move.direction);
 	if (newWord[0] == 0) {
 		newWord.push_back(move.y);
-		for (int i = 0; i < (int) move.word.size(); ++i)
+		for (int i = 0; i < (int) move.playedWord.size(); ++i)
 			newWord.push_back(move.x + i);
 	} else {
 		newWord.push_back(move.x);
-		for (int i = 0; i < (int) move.word.size(); ++i)
+		for (int i = 0; i < (int) move.playedWord.size(); ++i)
 			newWord.push_back(move.y + i);
 	}
 

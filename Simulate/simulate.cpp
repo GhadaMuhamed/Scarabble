@@ -188,12 +188,14 @@ int simualte::simFinal2(Heuristic & heu, int idx, Board & board, bool game, Play
 }
 
 Move simualte::nextPlay(  Heuristic  heu, const vector<Move>& plays,
-	const  Board & board, const Bag & bag,  Player&  ana, const Judge & j,
-	Player& opponent,int d) {
-	if (plays.empty()) {
+						  const  Board & board, const Bag & bag,  Player&  ana, const Judge & j,
+						  Player & opponent,int d)
+{
+
+	if (!plays.size()) {
 		Move m;
 		heu.setPlayer(ana);
-		char *ex = new char[7];
+		char* ex = new char[7];
 		heu.getChange(ex);
 		if (strlen(ex) == 0)
 			m.switchMove = true;
@@ -203,25 +205,40 @@ Move simualte::nextPlay(  Heuristic  heu, const vector<Move>& plays,
 	}
 	depth = d;
 	Player anaCopy(ana.getPlayerID());
-	Player opponentCopy(opponent.getPlayerID());
+	Player  opponentCopy(opponent.getPlayerID());
 	Bag bagCopy = bag;
 	Board boardCopy = board;
-	int size = (int) plays.size();
+	anaCopy.addScore(ana.getScore());
+    anaCopy.setTotalTies(ana.getTotalTies());
 	int idx = 0;
 	double mx = -1e9;
+	opponentCopy.putScore(opponent.getScore());
+    opponentCopy.setTotalTies(opponent.getTotalTies());
 	for (int i = 0; i < plays.size(); ++i) {
 		for (int k = 0; k < 27; ++k) {
 			anaCopy.addValue(ana.getValue(k), k);
 		}
-
 		for (int k = 0; k < 27; ++k) {
 			opponentCopy.addValue(opponent.getValue(k), k);
 		}
 		boardCopy = board;
 		bagCopy = bag;
-		float score = J.applyMove(plays[i], boardCopy, anaCopy, bagCopy);
+
+		float  score = J.applyMove(plays[i], boardCopy, anaCopy, bagCopy);
 		for (int k = 0; k < 1000; ++k) {
 			score += ProbabilisticSearch(heu, 0, boardCopy, 1, anaCopy, opponentCopy, bagCopy, 0);
+            bagCopy = bag;
+            boardCopy = board;
+            for (int k = 0; k < 27; ++k) {
+                anaCopy.addValue(ana.getValue(k), k);
+            }
+            for (int k = 0; k < 27; ++k) {
+                opponentCopy.addValue(opponent.getValue(k), k);
+            }
+            anaCopy.addScore(ana.getScore());
+            anaCopy.setTotalTies(ana.getTotalTies());
+            opponentCopy.putScore(opponent.getScore());
+            opponentCopy.setTotalTies(opponent.getTotalTies());
 		}
 		if (mx < score) {
 			mx = score;

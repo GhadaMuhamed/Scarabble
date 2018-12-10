@@ -30,6 +30,7 @@ impToInt Communcation::start(intToImp c) {
 		player2 = new Player(1);
 		player2->addScore(c.opponent_score);
 		player1->addScore(c.Player_score);
+		player2->setTotalTies(7);
 		judge = new Judge();
 		dic = new dictionary("sowpods.txt");
 		heu = new Heuristic(*board, *dic, *bag, *judge, *player1, *player2);
@@ -90,6 +91,7 @@ impToInt Communcation::start(intToImp c) {
 		if (c.Msgtype == 5) {
 			// call ui
 			judge->applyMove(myLast, *board, *player1, *bag);
+
 			ret.boardUpdated = true;
 			board->getBoard(ret.Board);
 		}
@@ -106,6 +108,10 @@ void Communcation::applyOpponentMove(Move& mv, uint8_t tiles[]) {
 			bag->removeTie(tiles[i]);
 		else
 			bag->removeTie(27);
+		if (bag->bagLen()>6)
+			player2->setTotalTies(7);
+		else player2->setTotalTies(bag->bagLen());
+
 }
 void Communcation::addPlayerTies(uint8_t tiles[]) {
 	for (int i = 0; i < 7; ++i) {

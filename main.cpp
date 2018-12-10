@@ -28,7 +28,8 @@ Move appropriateSimulation(Board& board, dictionary& dic, Player players[2], int
 		return n.mv;
 	}
 	else {
-		return sim.nextPlay(heu, availableMoves, board, bag, players[turn], j, players[1 - turn], 10);
+	    Player p(players[1 - turn].getPlayerID());
+		return sim.nextPlay(heu, availableMoves, board, bag, players[turn], j, p, 10);
 	}
 }
 

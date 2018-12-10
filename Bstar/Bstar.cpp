@@ -13,8 +13,8 @@ node Bstar::b_star(vector<Move> words, Board board, Player player1,
 	node alternate;
 	int turn = 0; //zero => my turn else => his turn
 				  /////////////////////call dictionary with the turn's char's
-	Judge jdg;
-	Board brd;
+	Judge jdg = Judge();
+	Board brd = Board();
 	Player plr1(0);
 	Player plr2(2);
 	brd = board;

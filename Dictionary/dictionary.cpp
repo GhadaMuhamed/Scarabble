@@ -226,7 +226,8 @@ void dictionary::checkOne(int index,int index2,string rack,vector<string> row,st
 	}
 }
 void dictionary::execute(Board& b, std::string rack,int vecSize) {
-
+//cout<<rack<<endl;
+    this->returnVec.clear();
 	//get columns
 	int cols[15][15];
 	int board[15][15];

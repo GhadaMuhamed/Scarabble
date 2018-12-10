@@ -15,14 +15,12 @@
 #define DOWN      1
 
 class Judge {
-    dictionary dic;
 public:
 	Judge();
-	Judge(dictionary d);
 	long long pascal[101][101];
 	int applyMove(const Move &move, Board &board, Player &player, Bag &bag);
     int applyMoveNoChange(const Move &move, Board &board, Bag &bag);
-    bool isValidMove(Move move, Board board);
+    bool isValidMove(Move move, Board& board, dictionary& dic);
     bool isClosed(Board &board);
 	void nCr();
 };

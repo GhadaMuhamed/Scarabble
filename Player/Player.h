@@ -32,6 +32,7 @@ public:
 	void putScore(int newScr);
 	int getTie(int pos);
 	string getTieStr();
+	void setTotalTies(int t);
 	void addValue(int v,int tie);
 	int getValue (int tie);
 	int getPlayerID();
