@@ -142,6 +142,7 @@ Move nextPlay(Heuristic& heu, const vector<Move>&plays, Board board, Bag bag,
 		Move m;
 		heu.setPlayer(ana);
 		char* ex = new char[7];
+		heu.getChange(ex);
 		if (strlen(ex) == 0)
 			m.switchMove = true;
 		for (int i = 0; i < strlen(ex); ++i)

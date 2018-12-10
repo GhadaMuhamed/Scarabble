@@ -44,7 +44,7 @@ impToInt Communcation::start(intToImp c) {
 		ret.boardUpdated = true;
 		ret.rackUpdated = true;
 	} else if (c.Msgtype == 10) {
-//learning mode !!!!!!!!!!!!!!!!!!
+		//learning mode !!!!!!!!!!!!!!!!!!
 	}
 	if (c.order == 1) {
 		if (c.Msgtype == 11) {
@@ -76,8 +76,7 @@ impToInt Communcation::start(intToImp c) {
 			hisLast = castToMove(c.move);
 			if (checkStrings(c.move)) {
 				ret.Msgtype = 5;
-				//applyOpponentMove(mv, c.move.tiles);
-
+				applyOpponentMove(hisLast, c.move.tiles);
 			} else
 				ret.Msgtype = 6;
 			return ret;
@@ -205,6 +204,7 @@ Move_to_from_server Communcation::castToServerMove(Move & move) {
 
 		} else
 			serverMove.tiles[i] = -1;
+	serverMove.scoreOfTheMove=judge->applyMoveNoChange(move,*board,*bag);
 	return serverMove;
 }
 Communcation::~Communcation() {
