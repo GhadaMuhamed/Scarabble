@@ -25,7 +25,7 @@ Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 			-1.0 }, { 'n', 0.5 }, { 'o', -1.5 }, { 'p', -1.5 }, { 'q', -11.5 },
 			{ 'r', 1.5 }, { 's', 7.5 }, { 't', 0.0 }, { 'u', -3.0 },
 			{ 'v', -5.5 }, { 'w', -4.0 }, { 'x', 3.5 }, { 'y', -2.0 }, { 'z',
-					2.0 }, { '*', 24.5 } // '*' means blank
+					2.0 }, { 'e', 24.5 } // '*' means blank
 	};
 
 	//Duplicate weights
@@ -35,7 +35,7 @@ Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
 			{ 'm', -2.0 }, { 'n', -2.5 }, { 'o', -3.5 }, { 'p', -2.5 },
 			{ 'q', 0 }, { 'r', -3.5 }, { 's', -4.0 }, { 't', -2.5 },
 			{ 'u', -3.0 }, { 'v', -3.5 }, { 'w', -4.5 }, { 'x', 0 },
-			{ 'y', -4.5 }, { 'z', 0 }, { '*', 15.0 } };
+			{ 'y', -4.5 }, { 'z', 0 }, { 'e', 15.0 } };
 	/*j,k,q,x,z mknsh lehm rkm w 5lthm bzero,mmkn ab2a ashelhm mn lmap dh
 	 w a5od rkmhm mn fo2 k2nhm msh duplicate!
 	 */
@@ -63,19 +63,42 @@ void Heuristic::setPlayer(Player& p) {
 	player = &p;
 }
 
-bool Heuristic::filterPossibles(string s, int cur[]) {
+pair<bool, pair<int, int> > Heuristic::filterPossibles(string& s, int cur[]) {
 	int freq[27];
 	memset(freq, 0, sizeof(freq));
-	for (char j : s)
-		if (j >= 'A' && j <= 'Z')
-			freq[j - st]++;
+	int blank = cur[26];
+	for (int j = 0; j < (int) s.size(); ++j)
+		if (s[j] >= 'A' && s[j] <= 'Z')
+			freq[s[j] - st]++;
 		else
-			freq[26]++;
-	for (int j = 0; j < 27; ++j)
-		if (((freq[j] < cur[j] || freq[j] > cur[j] + bag->getTieCount(j))))
-			return false;
+			freq[s[j] - 'a']++, s[j] = toupper(s[j]);
+	int f = -1, sec = -1;
+	for (int j = 0; j < 26; ++j) {
+		if (freq[j] < cur[j])
+			return {false, {0,0}};
+		if (freq[j] > cur[j] + bag->getTieCount(j)) {
+			if ((freq[j] - (cur[j] + bag->getTieCount(j))) == 1) {
+				blank--;
+				if (blank < 0)
+					return {false, {0,0}};
+				if (f != -1)
+					sec = j;
+				else
+					f = j;
 
-	return true;
+			}
+			if ((freq[j] - (cur[j] + bag->getTieCount(j))) == 2) {
+				blank -= 2;
+				if (blank < 0)
+					return {false, {0,0}};
+				f = sec = j;
+			}
+
+			else
+				return {false, {0,0}};
+		}
+	}
+	return {true, {f,sec}};
 
 }
 ///implement for omnia
@@ -89,11 +112,16 @@ vector<pair<string, int>> Heuristic::getPossibleBingo(string str, int cur[]) {
 	for (int i = 0; i < (int) v.size(); ++i) {
 		if (v[i].word.size())
 			continue;
-		if (!filterPossibles(v[i].playedWord, cur))
+		pair<bool, pair<int, int> > pa = filterPossibles(v[i].playedWord, cur);
+		if (!pa.first)
 			continue;
 		//////////////////////////////////////////////////////
 		// h7sb el score
 		int score = J->applyMoveNoChange(v[i], *board, *bag);
+		if (pa.second.first != -1)
+			score -= bag->getTieScore(pa.second.first);
+		if (pa.second.second != -1)
+			score -= bag->getTieScore(pa.second.second);
 		pair<string, int> p = { v[i].playedWord, score };
 		ret.push_back(p);
 	}
@@ -130,18 +158,18 @@ double Heuristic::expectedBingoMe(Move& move) {
 			cur[word[i] - st]++;
 
 	vector<pair<string, int>> possible = getPossibleBingo(word, cur);
-	//possible = filterPossibles(possible, cur);
+//possible = filterPossibles(possible, cur);
 	double p = 0;
-	for (auto &i : possible) {
+	for (int i = 0; i < (int) possible.size(); ++i) {
 		memset(freq, 0, sizeof(freq));
-		for (int j = 0; j < (int) i.first.size(); ++j)
-			if (i.first[j] >= 'A' && i.first[j] <= 'Z')
-				freq[i.first[j] - st]++;
+		for (int j = 0; j < (int) possible[i].first.size(); ++j)
+			if (possible[i].first[j] >= 'A' && possible[i].first[j] <= 'Z')
+				freq[possible[i].first[j] - st]++;
 			else
 				freq[26]++;
 
 		// calculate the expected number of the score to make this word
-		p += calcProbability(freq, i.second, cur);
+		p += calcProbability(freq, possible[i].second, cur);
 	}
 	return p; // multiply  p * 0.8 assuming prob of bingo in the next play will decrease by 0.2
 }
@@ -149,10 +177,10 @@ double Heuristic::QwithU(string m) {
 	int cntQ = 0;
 	int cntU = 0;
 
-	for (char i : m)
-		if (i == 'Q')
+	for (int i = 0; i < (int) m.size(); ++i)
+		if (m[i] == 'Q')
 			cntQ++;
-		else if (i == 'U')
+		else if (m[i] == 'U')
 			cntU++;
 	if (cntQ && cntU)
 		return 30.0;
@@ -183,7 +211,7 @@ double Heuristic::RackLeaveScore(string C) {
 	double score = 0.0;
 
 	char x;
-	map<char, double> m;  // The accumulative weight for each letter in the rack
+	map<char, double> m; // The accumulative weight for each letter in the rack
 	int v = 0, c = 0; //the number of vowels and constants
 
 	for (int i = 0; i < (int) C.length(); i++) {
@@ -262,7 +290,7 @@ void Heuristic::getChange(char* ex) {
 }
 
 double Heuristic::getHeu(Move& m) {
-	// lma omnia trod 3alia hashof expented bingo opponenet
+// lma omnia trod 3alia hashof expented bingo opponenet
 	if (opponent->getScore() - player->getScore() > 60)
 		w[3] = startW[3] + 0.4;
 	else
@@ -377,7 +405,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
@@ -396,7 +424,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == 0)	//no letter in this box
+				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i, j) == 2)
 						perm += d_factor * 0.4;
@@ -416,7 +444,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	else {
 		//above the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -434,7 +462,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board->getBoardValue(i, newWord[1]) == 0)//no letter in this box
+			if (board->getBoardValue(i, newWord[1]) == 0) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i, newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -453,7 +481,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
@@ -472,7 +500,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == 0)	//no letter in this box
+				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j, i) == 2)
 						perm += d_factor * 0.4;
@@ -492,60 +520,83 @@ double Heuristic::DefensiveStrategy(Move move) {
 	return -n * perm;
 }
 
-void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
+/*void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
-	int mcount = possibleMoves.size();
-	string word1, word2;
-	int wlen, wlen2;
-	bool x;
-	int score;
-	std::size_t found;
-// a map of the characters with the opponent to easily check which chars he has
-	map<char, int> Or;
-	for (int i = 0; i < (int) oPPrack.size(); ++i)
-		Or.insert( { oPPrack[i], 0 });
+ int mcount = possibleMoves.size();  //the # of possible moves
+ string iw,jw;
+ int wlen, wlen2,ww;
+ int score;
+ std::size_t found;
+ // a map of the characters with the opponent to check if a ceratin char is with him or not
+ map<char, int> or ;
+ for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
 
-	for (int i = 0; i < mcount - 1; ++i) {
-		wlen = possibleMoves[i].word.length();
-		score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
-		possibleMoves[i].heuristicValue += score
-				/ possibleMoves[i].playedWord.length();
-		for (int j = i + 1; j < mcount; ++j) {
-			//which word is longer
-			wlen2 = possibleMoves[j].word.length();
-			if (wlen > wlen2) {
-				word1 = possibleMoves[i].word;
-				word2 = possibleMoves[j].word;
-				x = true; // the ith word is the greater  
-			} else if (wlen2 > wlen) {
-				word2 = possibleMoves[i].word;
-				word1 = possibleMoves[j].word;
-				x = false; //jth word is the greater
-			}
+ for (int i = 0; i < mcount - 1; ++i) {
 
-			found = word1.find(word2);  // check it word2 is subset of word1
-			if (found == 0) {
-				//check if the other chars are with the opponent too
-				for (int ww = found + word2.length(); ww < (int) word1.length();
-						++ww)
-					// check if the letters are with the opponent
-					if (Or.count(word1[ww])) {
+ // the formed word
+ if (possibleMoves[i].direction == 0) iw = board->getHorizontalWord(possibleMoves[i].x, possibleMoves[i].y);
+ else
+ iw=board->getVerticalWord(possibleMoves[i].x, possibleMoves[i].y);
 
-						if (x) {
-							possibleMoves.erase(possibleMoves.begin() + j);
-							possibleMoves[i].heuristicValue += 10;
-						} else { //remove the ith word and break from the j loop
-							possibleMoves.erase(possibleMoves.begin() + i);
-							possibleMoves[j].heuristicValue += 10;
-							j = mcount;  // to break the jth loop
-						}
-					}
+ wlen =iw.length();
+ score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
+ possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
 
-				break;
-			}
+ for (int j = i + 1; j < mcount; ++j)
+ {
+ // the formed word
+ if (possibleMoves[j].direction == 0) jw = board->getHorizontalWord(possibleMoves[j].x, possibleMoves[j].y);
+ else
+ jw = board->getVerticalWord(possibleMoves[j].x, possibleMoves[j].y);
 
-		}
-	}
+ //which word is longer
+ wlen2 = jw.length();
+ if (wlen > wlen2) {
+ found = iw.find(jw);  // check if the smaller word is subset of the other
+ if (found == 0) {
+ for (ww = found + jw.length(); ww < iw.length(); ++ww) {
+ // check if the letters are with the opponent
+ if (or .count(iw[ww])) {
+ possibleMoves.erase(possibleMoves.begin() + i);
+ possibleMoves[j].heuristicValue += 10;
+ j = mcount;  // to break the jth loop
+ break;    //break from this loop
+ }
+ }
+ if (ww == iw.length()) {
+ //remove the jth word
+ possibleMoves.erase(possibleMoves.begin() + j);
+ possibleMoves[i].heuristicValue += 10;
 
-	std::sort(possibleMoves.begin(), possibleMoves.end());
-}
+ }
+ }
+
+
+ }
+ else if (wlen2 > wlen) {
+ found = jw.find(iw);  // check if the smaller word is subset of the other
+ if (found == 0) {
+ for (ww = found + iw.length(); ww < jw.length(); ++ww) {
+ // check if the letters are with the opponent
+ if (or .count(jw[ww])) {
+ //remove the jth word
+ possibleMoves.erase(possibleMoves.begin() + j);
+ possibleMoves[i].heuristicValue += 10;
+ break;    //break from this loop
+ }
+ }
+ if (ww == jw.length()) {
+ possibleMoves.erase(possibleMoves.begin() + i);
+ possibleMoves[j].heuristicValue += 10;
+ break;    //break from the jth loop
+
+ }
+ }
+ }
+
+
+ }
+
+ std::sort(possibleMoves.begin(), possibleMoves.end());
+
+ }*/
