@@ -23,7 +23,7 @@ class Bstar {
 
 	public :
 		node b_star(vector<Move> words, Board board, Player player1,
-			Player player2, Bag bg, dictionary & dic);
+			Player player2, Bag bg, dictionary & dic, Heuristic & heu);
 		void getBestAndAlternate(node curr, int& maxOptim, int& maxPessim, node& best, node& altern);
 
 };
