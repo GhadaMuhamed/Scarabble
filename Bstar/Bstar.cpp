@@ -1,6 +1,6 @@
 #include"Bstar.h"
 node Bstar::b_star(vector<Move> words, Board board, Player player1,
-	Player player2, Bag bg, dictionary & dic) {
+	Player player2, Bag bg, dictionary & dic,Heuristic & heu) {
 	/*1*/	int depth = 0;
 	int maxOptim = 0;
 	int maxPess = 0;
@@ -13,8 +13,26 @@ node Bstar::b_star(vector<Move> words, Board board, Player player1,
 	node alternate;
 	int turn = 0; //zero => my turn else => his turn
 				  /////////////////////call dictionary with the turn's char's
-	Judge jdg = Judge();
-	Board brd = Board();
+
+	if (!words.size()) {
+		Move m;
+		heu.setPlayer(player1);
+		char* ex = new char[7];
+		heu.getChange(ex);
+		if (strlen(ex) == 0)
+			m.switchMove = true;
+		for (int i = 0; i < strlen(ex); ++i)
+			m.tiles.push_back(ex[i]);
+		node r;
+		r.parent = NULL;
+		r.optim = 0;
+		r.pessim = INFINITY;
+		r.mv = m;
+		return r;
+	}
+
+	Judge jdg;
+	Board brd;
 	Player plr1(0);
 	Player plr2(2);
 	brd = board;
@@ -48,8 +66,8 @@ node Bstar::b_star(vector<Move> words, Board board, Player player1,
 					n.optim = jdg.applyMoveNoChange(n.mv, brd, bg); // get cost of the word as optim if it is my turn
 																	/////////n.pessim ???
 				}
-				else if (turn == 1)
-				{
+				else if (turn == 1){
+
 					n.optim = -1 * jdg.applyMoveNoChange(n.mv, brd, bg); // get cost of the word as pessim if it is the other's turn
 																		 /////////n.optim ???
 				}
