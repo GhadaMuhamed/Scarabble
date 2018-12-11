@@ -6,7 +6,7 @@
 #ifndef SCRABBLE_PLAYER_H
 #define SCRABBLE_PLAYER_H
 
-#include <bits/stdc++.h>
+
 
 
 using namespace std;
@@ -32,11 +32,12 @@ public:
 	void putScore(int newScr);
 	int getTie(int pos);
 	string getTieStr();
-	void setTotalTies(int t);
 	void addValue(int v,int tie);
-	int getValue (int tie);
-	int getPlayerID();
+	int getValue (int tie) const ;
+	int getPlayerID() const ;
+	void setTies(int);
 	friend ostream& operator<<(ostream& os, Player const& myObj);
+	Player& operator=(Player const& myObj);
 };
 
 #endif //SCRABBLE_PLAYER_H
