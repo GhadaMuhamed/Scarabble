@@ -1,12 +1,4 @@
-#include<iostream>
-#include<cmath>
-#include<map>
-#include<vector>
-#include<string>
-#include<algorithm>
-#include <sstream>
-#include<time.h>
-#include <chrono>
+#include<bits/stdc++.h>
 #include "../Heuristic/Heuristic.h"
 #include "../Judge/Judge.h"
 #include "simulate.h"

@@ -4,13 +4,8 @@
  *  Created on: Nov 25, 2018
  *      Author: ghada
  */
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <queue>
-#include<cmath>
-#include <algorithm>
+#include <bits/stdc++.h>
+
 #include "Heuristic.h"
 using namespace std;
 Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,

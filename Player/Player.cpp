@@ -1,13 +1,8 @@
 //
 // Created by riham on 24/10/18.
 //
-#include<iostream>
-#include<cmath>
-#include<map>
-#include<vector>
-#include<string>
-#include<algorithm>
-#include <sstream>
+#include<bits/stdc++.h>
+
 using namespace std;
 #include "Player.h"
 Player::Player(int playerId) :
