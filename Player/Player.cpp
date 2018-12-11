@@ -13,7 +13,7 @@ using namespace std;
 Player::Player(int playerId) :
 		playerId(playerId) {
 	//if (playerId == 0)
-		memset(myTies, 0, sizeof myTies);
+	memset(myTies, 0, sizeof myTies);
 	/*else
 		for (int i = 0; i < 27; ++i)
 			myTies[i] = 100;*/
@@ -38,7 +38,7 @@ int Player::getValue(int tie) const {
 
 	return myTies[tie];
 }
-int Player::getPlayerID() const  {
+int Player::getPlayerID()  {
 	return playerId;
 }
 bool Player::addTie(int tie) {
@@ -50,7 +50,7 @@ bool Player::addTie(int tie) {
 }
 
 bool Player::playTie(int tie) {
-	
+
 	if (tie < 0 || tie > 26 || myTies[tie] <= 0)
 		return false; // the player doesn't have any ties
 	myTies[tie]--;
@@ -98,13 +98,17 @@ string Player::getTieStr() {
 }
 
 ostream& operator<<(ostream& os, Player const& myObj) {
-	os << "\nPlayer: " << myObj.playerId << "\ttotal number of ties: "
-			<< myObj.totalTies << "\t ties: ";
-	for (int i = 0; i < 27; i++) {
+	os << "\n Player: " << myObj.playerId << "\t total number of ties: "
+	   << myObj.totalTies << "\t Score"<< myObj.score << "\t ties: ";
+	for (int i = 0; i < 26; i++) {
 		if (myObj.myTies[i] != 0) {
 			os << "( char=" << char(i + 'A') << ", count=" << myObj.myTies[i]
-					<< " ) ";
+			   << " ) ";
 		}
+	}
+	for (int i = 0; i < myObj.myTies[26]; i++) {
+		os << "( char=" << 'e' << ", count=" << myObj.myTies[i]
+			<< " ) ";
 	}
 	os << endl;
 	return os;

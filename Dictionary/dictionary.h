@@ -23,7 +23,7 @@ public:
 	void search(std::string board, std::string word,int vecSize);
 	void search(std::string board, std::string word, int index,int vecSize);
 	bool check(std::string word);
-	void selectAll(std::string word);
+	vector<string> selectAll(std::string word);
 	std::vector<std::string> cast(int board[15][15]);
 	void test();
 	vector<Move> getVector();

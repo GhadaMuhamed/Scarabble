@@ -6,7 +6,6 @@
  */
 
 #include "Communcation.h"
-#include "../source.cpp"
 
 Communcation::Communcation() {
 	board = NULL;
@@ -16,6 +15,7 @@ Communcation::Communcation() {
 	bag = NULL;
 	dic = NULL;
 	heu = NULL;
+	sim=NULL;
 }
 impToInt Communcation::start(intToImp c) {
 	// start or disconnect
@@ -28,9 +28,11 @@ impToInt Communcation::start(intToImp c) {
 		board = new Board(c.Board_from_server);
 		player1 = new Player(0);
 		player2 = new Player(1);
+		sim=new simualte;
 		player2->addScore(c.opponent_score);
 		player1->addScore(c.Player_score);
 		player2->setTotalTies(7);
+
 		judge = new Judge();
 		dic = new dictionary("sowpods.txt");
 		heu = new Heuristic(*board, *dic, *bag, *judge, *player1, *player2);
@@ -48,6 +50,7 @@ impToInt Communcation::start(intToImp c) {
 		//learning mode !!!!!!!!!!!!!!!!!!
 	}
 	if (c.order == 1) {
+		// dy bt3t law asln l move bt3ty 8alat type 11
 		if (c.Msgtype == 11) {
 			//law omnia 3wza t5zn el tiles
 		}
@@ -58,11 +61,11 @@ impToInt Communcation::start(intToImp c) {
 			addPlayerTies(c.move.tiles);
 			ret.rackUpdated = true;
 		}
-
+//law eli odami 3mal exchange order 1 msg tybe 3 bygeli numver of tiles
 		if (c.Msgtype != 4) {
 			dic->execute(*board, player1->getTieStr());
-			Move best = nextPlay(*heu, dic->getVector(), *board, *bag, *player1,
-					*judge);
+			Move best = sim->nextPlay(*heu, dic->getVector(), *board, *bag, *player1,
+					*judge,*player2,10);
 			myLast = best;
 			if (best.switchMove)
 				ret.Msgtype = 2;
@@ -90,7 +93,6 @@ impToInt Communcation::start(intToImp c) {
 		if (c.Msgtype == 5) {
 			// call ui
 			judge->applyMove(myLast, *board, *player1, *bag);
-
 			ret.boardUpdated = true;
 			board->getBoard(ret.Board);
 		}

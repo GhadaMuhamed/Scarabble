@@ -5,7 +5,7 @@
 #ifndef SCRABBLE_JUDGE_H
 #define SCRABBLE_JUDGE_H
 
-#include <Dictionary/dictionary.h>
+#include "../Dictionary/dictionary.h"
 #include "../Bag/Bag.h"
 #include "../Board/Board.h"
 #include "../Player/Player.h"

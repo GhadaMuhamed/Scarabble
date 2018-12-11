@@ -10,9 +10,7 @@
 #include "../commToImp.h"
 #include "../Board/Board.h"
 #include "../Player/Player.h"
-#include "../Judge/Judge.h"
-#include "../Dictionary/dictionary.h"
-#include "../Heuristic/Heuristic.h"
+#include "../source.cpp"
 
 class Communcation {
 	Board* board;

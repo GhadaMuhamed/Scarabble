@@ -34,7 +34,7 @@ public:
 	string getTieStr();
 	void addValue(int v,int tie);
 	int getValue (int tie) const ;
-	int getPlayerID() const ;
+	int getPlayerID();
 	void setTies(int);
 	friend ostream& operator<<(ostream& os, Player const& myObj);
 	Player& operator=(Player const& myObj);

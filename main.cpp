@@ -21,30 +21,30 @@ void random_rack(Bag& bag, Player& player) {
 	}
 }
 Move appropriateSimulation(Board& board, dictionary& dic, Player players[2], int turn, simualte& sim, Heuristic& heu,
-	Judge  j, Bstar bstar,Bag & bag, vector<Move> &availableMoves, SuperLeavesTrie superLeavesTrie) {
+						   Judge  j, Bstar bstar,Bag & bag, vector<Move> &availableMoves, SuperLeavesTrie superLeavesTrie) {
 	Player p(1 - turn);
 	p.addScore(players[1 - turn].getScore());
 
 	if (bag.bagLen() <=7) {
-		node n = bstar.b_star(availableMoves,board,players[turn],p,bag,dic,heu);
+		node n = bstar.b_star(availableMoves,board,players[turn],p,bag,dic/*,heu*/);
 		return n.mv;
 	}
 	else if (bag.bagLen() == 8) {
 		return sim.simualteForPEG1(turn, bag, board, players[turn], heu, j, dic, p);
 	}
 
-	else {	
-		return sim.nextPlay(heu, availableMoves, board, bag, players[turn], j, p, 10, superLeavesTrie);
+	else {
+		return sim.nextPlay(heu, availableMoves, board, bag, players[turn], j, p, 3, superLeavesTrie);
 	}
 }
 
 int main() {
 	Board board = Board();
 	Bag bag = Bag();
-	Player players[] = { Player(0), Player(1) }; 
+	Player players[] = { Player(0), Player(1) };
 	simualte sim = simualte();
 	Bstar bstar = Bstar();
-	dictionary dic = dictionary("/home/riham/Documents/Machine Inteligence/Scarabble/Dictionary/sowpods.txt");
+	dictionary dic = dictionary("sowpods.txt");
 	Judge judge = Judge();
 	Heuristic heu = Heuristic(board, dic, bag, judge, players[0], players[1]);
 	SuperLeavesTrie superLeavesTrie = SuperLeavesTrie();
@@ -58,11 +58,11 @@ int main() {
 	cout << rack << endl;
 	while (true)
 	{
-		dic.execute(board, rack);
+		dic.execute(board, rack, 3);
 		vector<Move> moves = dic.getVector();
 		Move m = appropriateSimulation(board, dic, players, turn, sim, heu, judge, bstar, bag, moves, superLeavesTrie);
 		if (m.switchMove) pass++;
-		else 
+		else
 			pass = 0;
 
 		if (pass == 2) break;

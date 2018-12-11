@@ -71,7 +71,10 @@ Board::Board(uint8_t b[][BOARD_SIZE]) {
 ostream& operator<<(ostream& os, Board const& myObj) {
 	for (auto &i : myObj.board) {
 		for (int j : i) {
-			os << (j == -1? 0 : myObj.scores[j]) << char(j + 'A') << " ";
+			if (j >= 100 && j <= 125) {
+				os << (j == -1 ? 0 : myObj.scores[j]) << char(j - 100 + 'a') << " ";
+			} else 
+				os << (j == -1? 0 : myObj.scores[j]) << char(j + 'A') << " ";
 		}
 		os << endl;
 	}

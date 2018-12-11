@@ -11,6 +11,7 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
     // it applies the move and do changes on the variables
 	int score = 0, r = move.x, c = move.y;
 	int playerTiesCnt = 0, asideScores = 0, wordMultiplier = 1;
+	bool nonZeroScore = true;
 	string word = move.playedWord;
 	if (move.switchMove || word.empty())
 		return 0;
@@ -21,18 +22,30 @@ int Judge::applyMove(const Move &move, Board &board, Player &player, Bag &bag) {
         if (islower(chr)) {
             tie = int(chr - 'a');
             blankMargin = 100;
+            nonZeroScore = false;
         }
-        if (board.getBoardValue(r, c) == -1) {
-            // then it's empty, so the player is playing this
-            player.playTie(tie);
+        while (r < BOARD_SIZE && c < BOARD_SIZE && board.getBoardValue(r, c) != -1) {
+            int boardValue = board.getBoardValue(r, c);
+            if (boardValue >= 0 && boardValue <= 25) {
+                score += board.getMultiplierLetter(r, c) * bag.getTieScore(boardValue);
+            }
+            move.direction == RIGHT? c++ : r++;
+        }
+        if (r >= BOARD_SIZE || c >= BOARD_SIZE) {// impossible
+            cerr << "WORD out of board's boundary\n";
+            cerr << "X: " << move.x << " Y:" << move.y << " direction: " << move.direction << endl;
+            return 0;
+        }
 
-            board.applyMove(r, c, tie + blankMargin); // if it's lower case then put in the board from range 100~125
-            // getting the vertical word from this position
-            asideScores += (move.direction == RIGHT ? board.getVerticalWordScore(r, c) :
-                                                         board.getHorizontalWordScore(r, c));
-            playerTiesCnt++;
-        }
-        score += board.getMultiplierLetter(r, c) * bag.getTieScore(tie);
+        // then it's empty, so the player is playing this
+        player.playTie(tie);
+
+        board.applyMove(r, c, tie + blankMargin); // if it's lower case then put in the board from range 100~125
+        // getting the vertical word from this position
+        asideScores += (move.direction == RIGHT ? board.getVerticalWordScore(r, c) :
+                        board.getHorizontalWordScore(r, c));
+        playerTiesCnt++;
+        score += board.getMultiplierLetter(r, c) * bag.getTieScore(tie) * nonZeroScore;
         wordMultiplier *= board.getMultiplierWord(r, c);
         move.direction == RIGHT? c++ : r++;
     }
@@ -61,13 +74,23 @@ int Judge::applyMoveNoChange(const Move &move, Board &board, Bag &bag) {
             tie = int(chr - 'a');
         } else tie = int(chr - 'A');
 
-        if (board.getBoardValue(r, c) == -1) {
-            // then it's empty, so the player is playing this
-            // getting the vertical word from this position
-            asideScores += (move.direction == RIGHT ? board.getVerticalWordScore(r, c) :
-                                                        board.getHorizontalWordScore(r, c));
-            playerTiesCnt++;
+        while (r < BOARD_SIZE && c < BOARD_SIZE && board.getBoardValue(r, c) != -1) {
+            int boardValue = board.getBoardValue(r, c);
+            if (boardValue >= 0 && boardValue <= 25) {
+                score += board.getMultiplierLetter(r, c) * bag.getTieScore(boardValue);
+            }
+            move.direction == RIGHT ? c++ : r++;
         }
+        if (r >= BOARD_SIZE || c >= BOARD_SIZE) {// impossible
+            cerr << "WORD out of board's boundary\n";
+            cerr << "X: " << move.x << " Y:" << move.y << " direction: " << move.direction << endl;
+            return 0;
+        }
+        // then it's empty, so the player is playing this
+        // getting the vertical word from this position
+        asideScores += (move.direction == RIGHT ? board.getVerticalWordScore(r, c) :
+                        board.getHorizontalWordScore(r, c));
+        playerTiesCnt++;
         score += notZeroScore * board.getMultiplierLetter(r, c) * bag.getTieScore(tie); // if it's blank then don't calculate its score
         wordMultiplier *= board.getMultiplierWord(r, c);
         move.direction == RIGHT ? c++ : r++;

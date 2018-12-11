@@ -6,7 +6,13 @@
 #ifndef SCRABBLE_BOARD_H
 #define SCRABBLE_BOARD_H
 
-#include <bits/stdc++.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include<cmath>
+#include <algorithm>
 using namespace std;
 
 static const int BOARD_SIZE = 15;

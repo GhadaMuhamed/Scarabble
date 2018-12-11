@@ -4,7 +4,13 @@
  *  Created on: Nov 25, 2018
  *      Author: ghada
  */
-#include<bits/stdc++.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include<cmath>
+#include <algorithm>
 #include "../Dictionary/dictionary.h"
 #include "../Judge/Judge.h"
 
@@ -44,7 +50,7 @@ public:
 	double getHeu(Move& m);
 	vector<Move> getAllMoves();
 	double DefensiveStrategy(Move move);
-	void Slowendgame(vector<Move>& possibleMoves, string oPPrack);
+	//void Slowendgame(vector<Move>& possibleMoves, string oPPrack);
 
 	virtual ~Heuristic();
 };

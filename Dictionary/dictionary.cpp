@@ -9,10 +9,10 @@ dictionary::dictionary(std::string filename) {
 	int i = 0;
 	while (std::getline(myfile, line)) {
 		data.insertWord(line);
-	/*	if (++i % 5000 == 0)
-			std::cout << line << std::endl;*/
+		if (++i % 5000 == 0)
+			std::cout << line << std::endl;
 	}
-
+	cout << "start" << endl;
 }
 
 //inserting a word into an array given a line and a word
@@ -62,8 +62,15 @@ bool dictionary::check(std::string word) {
 	return this->data.check(this->data.root, word);
 }
 
-void dictionary::selectAll(std::string word) {
+vector<string> dictionary::selectAll(std::string word) 
+{
+	data.y.clear();
+	word = convert(word,true);
 	this->data.search(word);
+	vector<string> vec;
+	for (int i = 0; i < data.y.size(); ++i)
+		vec.push_back(data.y[i]);
+	return vec;
 }
 
 //never mind it's just for test :D
@@ -119,6 +126,7 @@ vector<string> dictionary::cast(int board[15][15]) {
 	}
 	return rvec;
 }
+//convert to gaddag form
 std::string dictionary::convert(std::string word,bool rack) {
 	std::string temp;
 
@@ -129,20 +137,22 @@ std::string dictionary::convert(std::string word,bool rack) {
 			else
 				temp +='E';
 		else
-			temp += (char)(word[i] + 32);
+			if(word[i] >= 'A'&&word[i] <= 'Z')
+				temp += (char)(word[i] + 32);
 	return temp;
 }
+//to lowercase
 std::string dictionary::smallize(std::string word)
 {
 		string temp="";
 		for (int i = 0; i < word.size(); ++i)
-			if (word[i] <= 'Z')
+			if (word[i] <= 'A'&&word[i] <= 'Z')
 				temp += (char)((int)word[i] + 32);
 			else
 				temp += word[i];
 		return temp;
 }
-
+//reverse back
 std::string dictionary::reverse(std::string word,bool rack) {
 	std::string temp;
 	for (int i = 0; i < word.length(); ++i)
@@ -152,11 +162,12 @@ std::string dictionary::reverse(std::string word,bool rack) {
 			else
 				temp += 'e';
 		else
-			temp += (char)(word[i] - 32);
+			if (word[i] <= 'z'&&word[i] >= 'a')
+				temp += (char)(word[i] - 32);
 	return temp;
 }
 //vector<pair<pair<string, string>, int>>
-//execute
+//check other direction
 int dictionary::checkWord(int index, int index2, vector<string> row, string col)
 {
 
@@ -204,6 +215,7 @@ int dictionary::checkWord(int index, int index2, vector<string> row, string col)
 	this->data.returnVector[index].second =ind;
 	return 1;
 }
+//check if there's one
 void dictionary::checkOne(int index,int index2,string rack,vector<string> row,string col,int vecSize)
 { 
 	if (data.returnVector[index].first.second.size() == rack.size()-1)
@@ -221,13 +233,12 @@ void dictionary::checkOne(int index,int index2,string rack,vector<string> row,st
 		}
 		row[data.returnVector[index].second][index2] = data.returnVector[index].first.first[k-data.returnVector[index].second];
 		this->search(row[data.returnVector[index].second], data.returnVector[index].first.second, index2, vecSize);
-		this->data.returnVector[index].first.first = data.returnVector[index].first.first[k - data.returnVector[index].second];
-		this->data.returnVector[index].second = k;
+		//e3melo hena
 	}
 }
 void dictionary::execute(Board& b, std::string rack,int vecSize) {
-//cout<<rack<<endl;
-    this->returnVec.clear();
+	
+	this->returnVec.clear();
 	//get columns
 	int cols[15][15];
 	int board[15][15];
@@ -249,8 +260,10 @@ void dictionary::execute(Board& b, std::string rack,int vecSize) {
 		{
 			if (checkWord(j, i, rows, col[i]) != 1)
 				continue;
-			
-			checkOne(j, i, rack, rows, col[i], vecSize);
+			int x = vecSize - data.returnVector.size() + 1;
+			if (x <= 0)
+				x = 0;
+			//checkOne(j, i, rack, rows, col[i], x);
 			returnVec.push_back(
 				Move(data.returnVector[j].second, i, true,
 					this->reverse(data.returnVector[j].first.first),
@@ -264,7 +277,10 @@ void dictionary::execute(Board& b, std::string rack,int vecSize) {
 			
 			if (checkWord(j, i,col, rows[i]) != 1)
 				continue;
-			checkOne(j, i, rack, col, rows[i], vecSize);
+			int x = vecSize - data.returnVector.size() + 1;
+			if (x <= 0)
+				x = 0;
+			//checkOne(j, i, rack, col, rows[i], x);
 			returnVec.push_back(
 				Move(i, data.returnVector[j].second, false,
 					this->reverse(data.returnVector[j].first.first),

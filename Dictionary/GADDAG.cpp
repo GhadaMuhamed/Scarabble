@@ -20,16 +20,9 @@ int findInVector(nodeG** pointers, const char &c)
 			return -1;
 		else
 			return 27;
-
-    int temp=0;
-    if((c>='A'&&c<='Z'))
-    {
-        temp=(int)c % 65 + 1;
-    }
-    else
-        if(c>='a'&&c<='z')
-	    temp = (int)c % 97 + 1;
-        else return -1;
+	if (!(c >= 'a'&&c <= 'z'))
+		return -1;
+	int temp = (int)c % 97 + 1;
 	if (pointers[temp] == nullptr)
 		return -1;
 	else return temp;
@@ -94,8 +87,6 @@ void GADDAG::search(std::string word, std::string board, int start, int indicato
 
 void GADDAG::search(std::string word)
 {
-	for (int i = word.length(); i < 7; ++i)
-		word += "E";
 	std::sort(word.begin(), word.end());
 	reverse(word.begin(), word.end());
 	std::string s1;
@@ -105,20 +96,6 @@ void GADDAG::search(std::string word)
 
 void GADDAG::select(nodeG *myroot, std::string word,std::string board, int start, int &globalStart, std::string newWord ,int indicator,int first,bool check,int vecSize)
 {
-    for(int i=0;i<word.length();++i)
-    if(!((word[i]>='a'&&word[i]<='z')||word[i]=='E'))
-    {
-        cout<<word<<endl;
-        cin>>word;
-        return;
-    }
-    for(int i=0;i<board.length();++i)
-        if(!((board[i]>='a'&&board[i]<='z')||(board[i]>='A'&&board[i]<='Z')||board[i]==' '))
-        {
-            cout<<board<<" 000 "<<endl;
-            cin>>word;
-            return;
-        }
 	if (vecSize > -1 && this->returnVector.size() >= vecSize)
 		return;
 	//me7tag a3raf el kelma bedaytha menen aw 3ala el aa2al me4 ad eh le7ad ma 3amelt reverse
@@ -130,7 +107,7 @@ void GADDAG::select(nodeG *myroot, std::string word,std::string board, int start
 	if (start >= k)
 	{
 
-		if (check)
+		if (check&&newWord.size()>0)
 		{
 			int z = findInVector(myroot->pointers, 'E');
 			if (z > 0)
@@ -254,6 +231,8 @@ void GADDAG::select(nodeG *myroot, std::string word,std::string board, int start
 		}
 	}
 }
+
+///
 void GADDAG::select(nodeG *myroot, std::string word,std::string newWord,bool check,bool use)
 {
 	if (myroot == nullptr)

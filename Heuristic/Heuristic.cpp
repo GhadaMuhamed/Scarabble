@@ -4,7 +4,13 @@
  *  Created on: Nov 25, 2018
  *      Author: ghada
  */
-#include<bits/stdc++.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include<cmath>
+#include <algorithm>
 #include "Heuristic.h"
 using namespace std;
 Heuristic::Heuristic(Board& b, dictionary& d, Bag& bg, Judge& j, Player& p,
@@ -247,12 +253,9 @@ double Heuristic::RackLeaveScore(string C) {
 	return score;
 }
 vector<Move> Heuristic::getAllMoves() {
-    static int cnt=0;
 	string s=player->getTieStr();
-	dec->execute(*board, s);
+	dec->execute(*board, s, 8);
 	vector<Move> v = dec->getVector();
-    cnt++;
-    cout<<cnt<<endl;
     return v;
 }
 void Heuristic::getChange(char* ex) {
@@ -304,7 +307,7 @@ double Heuristic::getHeu(Move& m) {
 
 	double num = w[0] * expectedBingoMe(m) + w[1] * RackLeaveScore(m.word)
 			+ w[2] * QwithU(m.playedWord) + w[3] * DefensiveStrategy(m)
-			+ w[4] * expectedBingoMe(m);
+			+ w[4] * expectedBingoOpponent();
 	return num;
 }
 
