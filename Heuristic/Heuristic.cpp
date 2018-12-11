@@ -404,8 +404,8 @@ double Heuristic::DefensiveStrategy(Move move) {
 			d_factor -= 0.3;
 		}
 		//under the word
-		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
+			d_factor = 1;
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
@@ -423,8 +423,9 @@ double Heuristic::DefensiveStrategy(Move move) {
 			}
 		}
 		//above the word
-		d_factor = 1;
+		
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
+			d_factor = 1;
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board->getBoardValue(i, j) == 0) //no letter in this box
 						{
@@ -480,8 +481,9 @@ double Heuristic::DefensiveStrategy(Move move) {
 		}
 
 		//right to  the word
-		d_factor = 1;
+		
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
+			d_factor = 1;
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
@@ -499,8 +501,8 @@ double Heuristic::DefensiveStrategy(Move move) {
 			}
 		}
 		//left to the word
-		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
+			d_factor = 1;
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
 				if (board->getBoardValue(j, i) == 0) //no letter in this box
 						{
@@ -524,81 +526,83 @@ double Heuristic::DefensiveStrategy(Move move) {
 
 /*void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
- int mcount = possibleMoves.size();  //the # of possible moves
- string iw,jw;
- int wlen, wlen2,ww;
- int score;
- std::size_t found;
- // a map of the characters with the opponent to check if a ceratin char is with him or not
- map<char, int> or ;
- for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
+	int mcount = possibleMoves.size();  //the # of possible moves
+	string iw,jw; 
+	int wlen, wlen2,ww;
+	int score;
+	std::size_t found;
+	// a map of the characters with the opponent to check if a ceratin char is with him or not
+	map<char, int> or ;
+	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
 
- for (int i = 0; i < mcount - 1; ++i) {
+	for (int i = 0; i < mcount - 1; ++i) {
 
- // the formed word
- if (possibleMoves[i].direction == 0) iw = board->getHorizontalWord(possibleMoves[i].x, possibleMoves[i].y);
- else
- iw=board->getVerticalWord(possibleMoves[i].x, possibleMoves[i].y);
+		// the formed word
+		if (possibleMoves[i].direction == 0) iw = board->getHorizontalWord(possibleMoves[i].x, possibleMoves[i].y);
+		else
+			iw=board->getVerticalWord(possibleMoves[i].x, possibleMoves[i].y);
 
- wlen =iw.length();
- score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
- possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
+		wlen =iw.length();
+		score = J->applyMoveNoChange(possibleMoves[i], *board, *bag);
+		possibleMoves[i].heuristicValue += score / possibleMoves[i].playedWord.length();
 
- for (int j = i + 1; j < mcount; ++j)
- {
- // the formed word
- if (possibleMoves[j].direction == 0) jw = board->getHorizontalWord(possibleMoves[j].x, possibleMoves[j].y);
- else
- jw = board->getVerticalWord(possibleMoves[j].x, possibleMoves[j].y);
+		for (int j = i + 1; j < mcount; ++j)
+		{
+			if (possibleMoves[i].direction == possibleMoves[j].direction) {
 
- //which word is longer
- wlen2 = jw.length();
- if (wlen > wlen2) {
- found = iw.find(jw);  // check if the smaller word is subset of the other
- if (found == 0) {
- for (ww = found + jw.length(); ww < iw.length(); ++ww) {
- // check if the letters are with the opponent
- if (or .count(iw[ww])) {
- possibleMoves.erase(possibleMoves.begin() + i);
- possibleMoves[j].heuristicValue += 10;
- j = mcount;  // to break the jth loop
- break;    //break from this loop
- }
- }
- if (ww == iw.length()) {
- //remove the jth word
- possibleMoves.erase(possibleMoves.begin() + j);
- possibleMoves[i].heuristicValue += 10;
+			// the formed word
+			if (possibleMoves[j].direction == 0) jw = board->getHorizontalWord(possibleMoves[j].x, possibleMoves[j].y);
+			else
+				jw = board->getVerticalWord(possibleMoves[j].x, possibleMoves[j].y);
 
- }
- }
+			//which word is longer
+			wlen2 = jw.length();
+			if (wlen > wlen2) {
+				found = iw.find(jw);  // check if the smaller word is subset of the other
+				if (found == 0) {
+					for (ww = found + jw.length(); ww < iw.length(); ++ww) {
+						// check if the letters are with the opponent
+						if (or .count(iw[ww])) {
+							//remove the jth word
+							possibleMoves.erase(possibleMoves.begin() + j);
+							break;//to break the jth loop
+						}
+					}
+					if (ww == iw.length()) {
+						possibleMoves.erase(possibleMoves.begin() + i);
+						possibleMoves[j].heuristicValue += 10;
+						break;  // to break the ith loop
+						
 
+					}
+				}
+				
 
- }
- else if (wlen2 > wlen) {
- found = jw.find(iw);  // check if the smaller word is subset of the other
- if (found == 0) {
- for (ww = found + iw.length(); ww < jw.length(); ++ww) {
- // check if the letters are with the opponent
- if (or .count(jw[ww])) {
- //remove the jth word
- possibleMoves.erase(possibleMoves.begin() + j);
- possibleMoves[i].heuristicValue += 10;
- break;    //break from this loop
- }
- }
- if (ww == jw.length()) {
- possibleMoves.erase(possibleMoves.begin() + i);
- possibleMoves[j].heuristicValue += 10;
- break;    //break from the jth loop
+			}
+			else if (wlen2 > wlen) {
+				found = jw.find(iw);  // check if the smaller word is subset of the other
+				if (found == 0) {
+					for (ww = found + iw.length(); ww < jw.length(); ++ww) {
+						// check if the letters are with the opponent
+						if (or .count(jw[ww])) {
+							possibleMoves.erase(possibleMoves.begin() + i);
+							j = mcount;
+							break;    //break from the wth loop
+						}
+					}
+					if (ww == jw.length()) {
+						//remove the jth word
+						possibleMoves.erase(possibleMoves.begin() + j);
+						possibleMoves[i].heuristicValue += 10;
 
- }
- }
- }
+					}
+				  }
+				}
+			}
 
+			
+	}
 
- }
+	std::sort(possibleMoves.begin(), possibleMoves.end());
 
- std::sort(possibleMoves.begin(), possibleMoves.end());
-
- }*/
+}*/
