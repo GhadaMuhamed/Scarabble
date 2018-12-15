@@ -11,18 +11,16 @@ learnedWeights::learnedWeights()
 	wtFile.close();
 }
 
-void learnedWeights::newmove(int player, Move m, Board B,Bag bag,Judge j) {
+void learnedWeights::newmove(vector<Point>,int player,int total_score,Move m, Board B,Bag bag,Judge j) {
 	//This is my turn
-	string line= (!m.direction)? B.getRow(m.x): B.getCoulmn(m.y);
-
 
 	if (player == 0) {
 		if (m.playedWord == "")agent[2] += 1;//rack evaluation
 		else
 		{
 			if (m.playedWord.size() == 7)agent[0] += 50;//bingo score
-			agent[3] += j.applyMove(m, B, bag);//total score of this move
-			agent[1] += calculate_prem(m,B,bag,line);//prem score
+			agent[3] += total_score;//total score of this move
+			agent[1] += calculate_prem(positions,B,bag);//prem score
 
 			++my_moves;
 		}
@@ -34,8 +32,8 @@ void learnedWeights::newmove(int player, Move m, Board B,Bag bag,Judge j) {
 		else
 		{
 			if (m.playedWord.size() == 7)opponent[0] += 50;//bingo score
-			opponent[3] += j.applyMove(m, B, bag);//total score of this move
-			agent[1] += calculate_prem(m, B, bag, line);//prem score
+			opponent[3] += total_score;//total score of this move
+			opponent[1] += calculate_prem(positions, B, bag);//prem score
 			++opp_moves;
 	}
 
@@ -47,16 +45,7 @@ void learnedWeights::updateWeights(int winner) {
 
 	wtFile.open("myfile.txt");
 
-	//I am the winner
-	/*
-	if (winner == 0) {
-		Statistics[0] += agent[0];
-		Statistics[1] += agent[1];
-		Statistics[2] += agent[2];
-		Statistics[3] += my_moves;
-	}
-	// The opponent is the winner
-	else {}*/
+	//the agent lost
 	if (winner == 1) {
 		Statistics[0] = opponent[0] / opponent[3];
 		Statistics[1] = opponent[1] / opponent[3];
@@ -78,46 +67,36 @@ void learnedWeights::updateWeights(int winner) {
 
 
 
-int learnedWeights:: calculate_prem(Move m, Board B,Bag bag,string l) {
+int learnedWeights:: calculate_prem(vector<Point> positions, Board B,Bag bag) {
 	int points = 0;
-	string line = "";
-	vector<pair<int, int>> positions;
-	line = (!m.direction) ? B.getHorizontalWord(m.x, m.y): B.getVerticalWord(m.x, m.y);
-	int y;
-	if (!m.direction) {
-		 y=m.y;
 
-		for (int i = y; i < 15 ||(positions.size() ==m.playedWord.size()); ++i) {
-
-			if (B.getBoardValue(m.x,i) == -1) positions.push_back(make_pair(m.x,i));
-		}
-
-	}
-	else
-	{
-		y = m.x;
-		for (int x = y; x < 15 || (positions.size() == m.playedWord.size()); ++x) {
-
-			if (B.getBoardValue( x,m.y) == -1) positions.push_back(make_pair( x,m.y));
-		}
-	}
 
 	for (int k = 0; k < positions.size();++k) {
 
-		if (  B.getMultiplierLetter(positions[k].first, positions[k].second) >1)points+=  B.getMultiplierLetter(positions[k].first, positions[k].second) *	bag.getTieScore(m.playedWord[k]));
-		if (B.getMultiplierWord(positions[k].first, positions[k].second) > 1) {
+			if (  B.getMultiplierLetter(positions[k].r, positions[k].c) >1  && B.getBoardValue(positions[k].c,positions[k].c)<100)   points+=  B.getMultiplierLetter(positions[k].r, positions[k].c) *	bag.getTieScore(B.getBoardValue(positions[k].c, positions[k].c));
+			if (B.getMultiplierWord(positions[k].r, positions[k].c) > 1) {
 
-			string word = ""; int score = 0;
-			word = B.getHorizontalWord(positions[k].first, positions[k].second);
-			for (char e:word) score += bag.getTieScore(e);
+				string word = ""; int score = 0;
+				int temp_a = B.getBoardValue(positions[k].c, positions[k].c);
+				word = B.getHorizontalWord(positions[k].r, positions[k].c);
+				if (word.length() > 1) {
+					for (char e : word) score += (isupper(e)) ? bag.getTieScore(e - 65) : 0;
 
-			word = B.getVerticalWord(positions[k].first, positions[k].second);
-			for (char e : word) score += bag.getTieScore(e);
+					score -= (temp_a < 100) ? bag.getTieScore( temp_a) : 0;
+				}
 
-			points += (B.getMultiplierWord(positions[k].first, positions[k].second)) * score;
+				word = B.getVerticalWord(positions[k].r, positions[k].c);
+				if (word.length() > 1) {
+					for (char e : word) score += (isupper(e)) ? bag.getTieScore(e - 65) : 0;
+					score -= (temp_a < 100) ? bag.getTieScore(temp_a) : 0;
+				}
 
+				score += (temp_a < 100) ? bag.getTieScore(temp_a) : 0;
+				points += (B.getMultiplierWord(positions[k].r, positions[k].c)) * score;
+
+			}
 		}
-	}
+
 	return points;
 }
 

@@ -11,6 +11,8 @@ class learnedWeights
 {
 private:
 
+
+  struct Point{ int r,c; };
 	float opponent[4] = {0,0,1,0}; // oppnent's bingo,perm,rack, total score
 	float agent[4] = {0,0,1,0};    //my bingo,perm,rack, total score
 	int opp_moves,my_moves; // the number of moves of each player
@@ -21,8 +23,8 @@ public:
 	learnedWeights();
 	~learnedWeights();
 	void updateWeights(int winner);
-	void newmove(int player,Move m,Board B, Bag bag, Judge j);
-	int calculate_prem(Move m, Board B, Bag bag,string line);
+	void newmove(vector<Point> positions,int player,int total_score,Move m,Board B, Bag bag, Judge j);
+	int calculate_prem(vector<Point> positions, Board B, Bag bag);
 	double* getWeights();
 
 };
