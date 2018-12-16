@@ -146,3 +146,42 @@ void Judge::nCr() {
 			pascal[i][j] = pascal[i - 1][j - 1] + pascal[i - 1][j];
 
 }
+
+pair<int,string> Judge::getFormedWord(const Move &move, Board &board, Bag &bag) {
+	// it applies the move without doing any changes on the variables
+	int score = 0, r = move.x, c = move.y, playerTiesCnt = 0, asideScores = 0;
+	string word = move.playedWord;
+	int wordMultiplier = 1;
+
+	pair <int, string> wordandscore;
+	wordandscore.first = 0;
+	wordandscore.second = "";
+
+	if (move.switchMove || word.empty()) {
+		return wordandscore;
+	}
+
+	for (auto chr : word) {
+		int tie = int(chr - 'A');
+		if (board.getBoardValue(r, c) == -1) {
+			// then it's empty, so the player is playing this
+			// getting the vertical word from this position
+			asideScores += (move.direction == RIGHT ? board.getVerticalWordScore(r, c) :
+				board.getHorizontalWordScore(r, c));
+			if (move.direction == RIGHT)
+				wordandscore.second=board.getHorizontalWord(r, c);
+			else 
+				wordandscore.second = board.getVerticalWord(r,c);
+			playerTiesCnt++;
+		}
+		score += board.getMultiplierLetter(r, c) * bag.getTieScore(tie);
+		wordMultiplier *= board.getMultiplierWord(r, c);
+		move.direction == RIGHT ? c++ : r++;
+	}
+	// if the player played all of its rock then the score increases by 50
+	if (playerTiesCnt == 7) score += 50;
+
+	wordandscore.first = score * wordMultiplier + asideScores;
+	return wordandscore;
+}
+
