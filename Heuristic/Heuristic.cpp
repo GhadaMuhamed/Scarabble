@@ -524,7 +524,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	return -n * perm;
 }
 
-/*void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
+void Heuristic:: Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
 	int mcount = possibleMoves.size();  //the # of possible moves
 	string iw,jw; 
@@ -535,6 +535,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	map<char, int> or ;
 	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
 
+	while(mcount>2){
 	for (int i = 0; i < mcount - 1; ++i) {
 
 		// the formed word
@@ -565,12 +566,16 @@ double Heuristic::DefensiveStrategy(Move move) {
 						if (or .count(iw[ww])) {
 							//remove the jth word
 							possibleMoves.erase(possibleMoves.begin() + j);
+							j--;
+							mcount--;
 							break;//to break the jth loop
 						}
 					}
 					if (ww == iw.length()) {
 						possibleMoves.erase(possibleMoves.begin() + i);
 						possibleMoves[j].heuristicValue += 10;
+						i--;
+						mcount--;
 						break;  // to break the ith loop
 						
 
@@ -586,6 +591,8 @@ double Heuristic::DefensiveStrategy(Move move) {
 						// check if the letters are with the opponent
 						if (or .count(jw[ww])) {
 							possibleMoves.erase(possibleMoves.begin() + i);
+							i--;
+							mcount--;
 							j = mcount;
 							break;    //break from the wth loop
 						}
@@ -593,6 +600,8 @@ double Heuristic::DefensiveStrategy(Move move) {
 					if (ww == jw.length()) {
 						//remove the jth word
 						possibleMoves.erase(possibleMoves.begin() + j);
+						j--;
+						mcount--;
 						possibleMoves[i].heuristicValue += 10;
 
 					}
@@ -602,7 +611,8 @@ double Heuristic::DefensiveStrategy(Move move) {
 
 			
 	}
+	}
 
 	std::sort(possibleMoves.begin(), possibleMoves.end());
 
-}*/
+}
