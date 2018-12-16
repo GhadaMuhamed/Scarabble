@@ -23,6 +23,7 @@ public:
     bool isValidMove(Move move, Board& board, dictionary& dic);
     bool isClosed(Board &board);
 	void nCr();
+	pair<int, string> getFormedWord(const Move &move, Board &board, Bag &bag);
 };
 
 #endif //SCRABBLE_JUDGE_H
