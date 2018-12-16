@@ -371,7 +371,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	if (newWord[0] == 0) {
 		//search horizontally--left of the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board->getBoardValue(newWord[1], i) == -1) //no letter in this box
+			if (board->getBoardValue(i,newWord[1]) == -1) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i,newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -389,7 +389,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board->getBoardValue(newWord[1], i) == -1) //no letter in this box
+			if (board->getBoardValue(i,newWord[1]) == -1) //no letter in this box
 					{
 				if (board->getMultiplierLetter(i,newWord[1]) == 2)
 					perm += d_factor * 0.4;
@@ -407,7 +407,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == -1) //no letter in this box
+				if (board->getBoardValue(j,i) == -1) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j,i) == 2)
 						perm += d_factor * 0.4;
@@ -427,7 +427,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 		
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(i, j) == -1) //no letter in this box
+				if (board->getBoardValue(j,i) == -1) //no letter in this box
 						{
 					if (board->getMultiplierLetter(j,i) == 2)
 						perm += d_factor * 0.4;
@@ -447,7 +447,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 	else {
 		//above the word
 		for (int i = newWord[2] - 1; i >= (newWord[2] - 3) && i >= 0; i--) {
-			if (board->getBoardValue(i, newWord[1]) == -1) //no letter in this box
+			if (board->getBoardValue(newWord[1],i) == -1) //no letter in this box
 					{
 				if (board->getMultiplierLetter(newWord[1],i) == 2)
 					perm += d_factor * 0.4;
@@ -465,7 +465,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[Wlen - 1] + 1;
 				i <= (newWord[Wlen - 1] + 3) && i < 15; i++) {
-			if (board->getBoardValue(i, newWord[1]) == -1) //no letter in this box
+			if (board->getBoardValue(newWord[1],i) == -1) //no letter in this box
 					{
 				if (board->getMultiplierLetter(newWord[1],i) == 2)
 					perm += d_factor * 0.4;
@@ -484,7 +484,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] + 1; i <= (newWord[1] + 3) && i < 15; i++) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == -1) //no letter in this box
+				if (board->getBoardValue(i,j) == -1) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i,j) == 2)
 						perm += d_factor * 0.4;
@@ -503,7 +503,7 @@ double Heuristic::DefensiveStrategy(Move move) {
 		d_factor = 1;
 		for (int i = newWord[1] - 1; i >= (newWord[1] - 3) && i >= 0; i--) {
 			for (int j = newWord[2]; j <= newWord[Wlen - 1]; j++) {
-				if (board->getBoardValue(j, i) == -1) //no letter in this box
+				if (board->getBoardValue(i,j) == -1) //no letter in this box
 						{
 					if (board->getMultiplierLetter(i,j) == 2)
 						perm += d_factor * 0.4;
@@ -535,8 +535,7 @@ void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 	map<char, int> or ;
 	for (int i = 0; i < oPPrack.size(); ++i) or .insert({ oPPrack[i],0 });
 
-	while (mcount > 2) {
-		for (int i = 0; i < mcount - 1; ++i) {
+		for (int i = 0; i < mcount - 1 && mcount>2; ++i) {
 
 			// the formed word
 			temp = J->getFormedWord(possibleMoves[i], *board, *bag);
@@ -610,7 +609,7 @@ void Heuristic::Slowendgame(vector<Move>& possibleMoves, string oPPrack) {
 
 			}
 		}
-	}
+	
 		std::sort(possibleMoves.begin(), possibleMoves.end());
 
 	}
